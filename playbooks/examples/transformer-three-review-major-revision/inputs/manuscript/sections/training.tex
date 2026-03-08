@@ -1,0 +1,13 @@
+\section{Training}
+
+\subsection{Data}
+
+We train on the standard WMT 2014 English-to-German and English-to-French translation tasks. Source and target sentences are tokenized with standard subword segmentation and batched by approximate sequence length.
+
+\subsection{Optimization}
+
+We optimize the models with Adam and use a learning-rate schedule with an initial warmup phase followed by inverse-square-root decay. Regularization includes dropout and label smoothing. Decoding uses beam search.
+
+\subsection{Implementation Notes}
+
+All models are trained on multi-GPU hardware, and the reported results come from configurations that were stable in our experiments. We use common model-selection practices from the sequence-to-sequence literature and report the strongest checkpoints obtained during training.

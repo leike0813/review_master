@@ -1,0 +1,9 @@
+- [x] Create proposal, design, and delta specs for the SQLite SSOT runtime migration.
+- [x] Replace the runtime workspace contract with `review-master.db` plus rendered Markdown views.
+- [x] Rewrite `init_artifact_workspace.py` to initialize the database and bootstrap rendered views.
+- [x] Rewrite `validate_artifact_consistency.py` as a DB-first validator and renderer.
+- [x] Update `SKILL.md` and reference documents to describe direct SQL writes and read-only rendered views.
+- [x] Retire the old runtime stage-four mapping/board split and introduce `comment-workboard.md`.
+- [x] Migrate both playbooks and both example workspaces to the DB-first runtime model.
+- [x] Regenerate validator output samples so they reflect DB-first semantics.
+- [x] Run OpenSpec validation, type checking, and workspace validator checks.

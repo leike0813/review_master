@@ -1,0 +1,35 @@
+\section{Results}
+
+\subsection{Machine Translation}
+
+\replaced{The Transformer improves over strong prior baselines on both WMT 2014 English-to-German and English-to-French. The larger model achieves a new state of the art on English-to-German and remains highly competitive on English-to-French while requiring substantially less reported training cost than earlier recurrent or convolutional systems under the stated accounting convention.}{The Transformer improves over strong prior baselines on both WMT 2014 English-to-German and English-to-French. The larger model achieves a new state of the art on English-to-German and remains highly competitive on English-to-French while requiring substantially less training cost than earlier recurrent or convolutional systems.}
+
+\begin{table}[h]
+\centering
+\caption{Headline comparison on WMT 2014 translation benchmarks.}
+\label{tab:headline-results}
+\begin{tabular}{lcc}
+\toprule
+Model & EN-DE BLEU & EN-FR BLEU \\
+\midrule
+GNMT + RL & 24.6 & 39.92 \\
+ConvS2S & 25.16 & 40.46 \\
+Transformer (base) & 27.3 & 38.1 \\
+Transformer (big) & 28.4 & 41.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\added{The baseline gain is not only a throughput story. In the main comparison, the attention-only encoder-decoder appears to benefit from short cross-token path lengths, which helps preserve long-range dependencies without recurrent state propagation. This gives a plausible explanation for why the model improves over baselines that remain more sequential in how they transport context.}
+
+\subsection{Model Variations}
+
+\replaced{We also tested several variations of the Transformer family during development. Single-head attention underperformed the default multi-head setting, removing dropout reduced generalization quality, and scaling the model improved BLEU without eliminating the contribution of the attention design. These patterns support the claim that the gains are not explained by model size alone.}{We also tested several variations of the Transformer family during development. The overall pattern was consistent with the headline results: larger attention-based models performed better, and the architecture was robust enough to support a strong translation system across both benchmark settings.}
+
+\subsection{Stability Statement}
+
+\added{We do not claim a full variance analysis from the draft alone, but the supplemental five-run evidence shows a narrow spread around the main result. This supports a conservative stability statement: the headline BLEU improvements are not obviously driven by a single unstable run, although broader robustness analysis remains future work.}
+
+\subsection{Interpretability}
+
+\replaced{Qualitatively, some attention heads appear to focus on linguistically meaningful relationships. In one long English-German sentence, an upper-layer head links a subordinate-clause introducer to the postponed main verb, while another head tracks a named entity span across punctuation boundaries. We treat this as an illustrative case study rather than a complete explanation of model behavior.}{Qualitatively, some attention heads appear to focus on linguistically meaningful relationships. This suggests that the model may also offer a more interpretable view of sequence transduction behavior than purely recurrent alternatives.}

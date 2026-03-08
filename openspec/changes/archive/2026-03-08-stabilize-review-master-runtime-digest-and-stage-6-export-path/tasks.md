@@ -1,0 +1,11 @@
+- [x] Add runtime digest maintenance rule to `AGENTS.md`
+- [x] Create OpenSpec specs for runtime digest sync, export patch path, and full LaTeX response export
+- [x] Update `review-master/SKILL.md` and `review-master/assets/runtime/skill-runtime-digest.md`
+- [x] Add export patch tables to `review-master/assets/schema/review-master-schema.yaml`
+- [x] Add `export-patch-plan.md` rendered view and update Stage 6 templates
+- [x] Add `review-master/scripts/export_manuscript_variants.py`
+- [x] Update `workspace_db.py`, `init_artifact_workspace.py`, and `gate_and_render_workspace.py`
+- [x] Update Stage 6 supporting docs and glossary/recipes/state-machine references
+- [x] Add pytest regression coverage for export path and runtime digest sync
+- [x] Regenerate sample DB fixtures, rendered views, sample outputs, and playbook text
+- [x] Run `openspec validate`, `mypy`, `pytest`, and sample gate-and-render regression checks

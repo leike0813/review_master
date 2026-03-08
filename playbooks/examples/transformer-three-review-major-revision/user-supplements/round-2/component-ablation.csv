@@ -1,0 +1,7 @@
+setting,en_de_bleu,delta_vs_base,notes
+base,27.3,0.0,Reference base configuration
+single_head_attention,24.9,-2.4,Single head underperforms the default multi-head design
+four_heads,25.5,-1.8,Fewer heads retain some quality but lose accuracy
+learned_positional_embedding,25.7,-1.6,Near the base result but not better than sinusoidal encoding
+dropout_zero,24.6,-2.7,Training without dropout degrades generalization
+large_model,28.4,1.1,Scaling width and depth improves BLEU

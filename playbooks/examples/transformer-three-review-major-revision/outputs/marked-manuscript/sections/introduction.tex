@@ -1,0 +1,9 @@
+\section{Introduction}
+
+Neural machine translation systems have traditionally relied on recurrent computation, and more recent work has shown that convolution can also support strong sequence transduction quality. Attention mechanisms are now widely used in these systems because they improve the handling of distant dependencies and make encoder-decoder interaction easier to optimize.
+
+In this paper we revisit the sequence transduction pipeline from the perspective of attention-first design. Instead of coupling attention with recurrence or convolution, we build a model in which the main computation is carried by stacked attention blocks and point-wise feed-forward layers. This leads to a system that is easier to parallelize and empirically stronger on large-scale translation benchmarks.
+
+\added{The central intuition is not only throughput. Self-attention gives every token a short path to every other token, so long-range dependencies can be modeled without waiting for recurrent state propagation or deep convolutional stacks. In practice, this makes it easier to preserve long-distance syntactic and semantic cues while still exploiting efficient matrix computation on modern accelerators.}
+
+Our experiments on WMT 2014 English-to-German and English-to-French show that the Transformer family delivers better headline BLEU scores than strong prior baselines at lower overall training cost. These findings indicate that attention can serve as a practical foundation for competitive translation systems, while the following sections make clear where the current evidence is strongest and where it remains limited.

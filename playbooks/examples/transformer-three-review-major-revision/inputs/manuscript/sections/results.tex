@@ -1,0 +1,31 @@
+\section{Results}
+
+\subsection{Machine Translation}
+
+The Transformer improves over strong prior baselines on both WMT 2014 English-to-German and English-to-French. The larger model achieves a new state of the art on English-to-German and remains highly competitive on English-to-French while requiring substantially less training cost than earlier recurrent or convolutional systems.
+
+\begin{table}[h]
+\centering
+\caption{Headline comparison on WMT 2014 translation benchmarks.}
+\label{tab:headline-results}
+\begin{tabular}{lcc}
+\toprule
+Model & EN-DE BLEU & EN-FR BLEU \\
+\midrule
+GNMT + RL & 24.6 & 39.92 \\
+ConvS2S & 25.16 & 40.46 \\
+Transformer (base) & 27.3 & 38.1 \\
+Transformer (big) & 28.4 & 41.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These results indicate that the attention-centric formulation is effective in practice. In particular, the model appears to capture long-range dependencies while remaining easy to optimize in parallel.
+
+\subsection{Model Variations}
+
+We also tested several variations of the Transformer family during development. The overall pattern was consistent with the headline results: larger attention-based models performed better, and the architecture was robust enough to support a strong translation system across both benchmark settings.
+
+\subsection{Interpretability}
+
+Qualitatively, some attention heads appear to focus on linguistically meaningful relationships. This suggests that the model may also offer a more interpretable view of sequence transduction behavior than purely recurrent alternatives.

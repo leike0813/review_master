@@ -1,0 +1,8 @@
+\section{Method}
+Our model uses a transformer encoder to fuse image tokens with spectral descriptors before classification.
+
+\subsection{\added{Ablation Setup}}
+\added{We added an ablation summary showing that removing either the image branch or the spectral branch weakens performance, indicating that the gain comes from complementary cross-modal evidence rather than a single dominant stream.}
+
+\subsection{Training Setup}
+\replaced{We use a fixed train/validation/test split of 640/160/200 plots and repeat all stochastic experiments with seeds 11, 17, 23, 29, and 37.}{We train the model with a single default split and report the final accuracy on the held-out test set.}

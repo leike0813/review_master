@@ -1,0 +1,13 @@
+\section{Training}
+
+\subsection{Data}
+
+We train on the standard WMT 2014 English-to-German and English-to-French translation tasks. English-German uses approximately 4.5M sentence pairs after standard cleaning and shared byte-pair encoding with a vocabulary of roughly 37k tokens. English-French uses approximately 36M sentence pairs with a 32k word-piece vocabulary. Sentence pairs are batched by approximate sequence length.
+
+\subsection{Optimization}
+
+We optimize the models with Adam and use a learning-rate schedule with an initial warmup phase followed by inverse-square-root decay. Regularization includes dropout and label smoothing. Decoding uses beam search.
+
+\subsection{Implementation Notes}
+
+All models are trained on 8 NVIDIA P100 GPUs. The base model is reported after averaging the final 5 checkpoints written at 10-minute intervals, while the big model averages the final 20 checkpoints. During inference we use beam size 4, length penalty 0.6, and a maximum output length of input length plus 50 with early stopping when possible. These details are necessary for a reproducible interpretation of the reported benchmark results.

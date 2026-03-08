@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="240" viewBox="0 0 420 240">
+  <rect width="420" height="240" fill="white"/>
+  <line x1="40" y1="200" x2="380" y2="200" stroke="#333" stroke-width="2"/>
+  <line x1="40" y1="30" x2="40" y2="200" stroke="#333" stroke-width="2"/>
+  <polyline fill="none" stroke="#0b6e4f" stroke-width="3" points="60,92 130,84 200,88 270,78 340,96"/>
+  <circle cx="60" cy="92" r="4" fill="#0b6e4f"/>
+  <circle cx="130" cy="84" r="4" fill="#0b6e4f"/>
+  <circle cx="200" cy="88" r="4" fill="#0b6e4f"/>
+  <circle cx="270" cy="78" r="4" fill="#0b6e4f"/>
+  <circle cx="340" cy="96" r="4" fill="#0b6e4f"/>
+  <text x="150" y="20" font-size="16" font-family="Arial">Seed Stability Across Five Runs</text>
+  <text x="25" y="40" font-size="12" font-family="Arial" transform="rotate(-90,25,40)">Top-1 Accuracy</text>
+  <text x="180" y="230" font-size="12" font-family="Arial">Random Seed</text>
+</svg>

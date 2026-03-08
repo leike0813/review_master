@@ -1,0 +1,9 @@
+- [x] Add OpenSpec proposal, design, tasks, and consistency specs.
+- [x] Add `review-master/references/workflow-glossary.md` as the single naming and terminology source.
+- [x] Normalize publish-directory terminology across `SKILL.md`, stage docs, recipes, helper scripts, state machine, and runtime digest.
+- [x] Align formal action naming, especially the Stage 6 completion action and final-export terminology.
+- [x] Rename sample fixture directories from `validator-output/` to `gate-and-render-output/` and normalize sample file names.
+- [x] Update playbooks and example references to use the normalized paths, action ids, and output naming.
+- [x] Refresh JSON fixtures so runtime digest text and action naming match the normalized contract.
+- [x] Validate the change with `openspec validate ... --strict`.
+- [x] Run mypy on runtime scripts and re-run sample `gate_and_render_workspace.py` checks.

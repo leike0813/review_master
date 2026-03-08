@@ -1,0 +1,5 @@
+checkpoint,dev_macro_f1,comment
+epoch_18,0.910,best checkpoint in the inspected run
+epoch_19,0.908,slight regression after the best checkpoint
+epoch_20,0.907,late-epoch overfitting begins
+epoch_21,0.905,continued decline after the peak

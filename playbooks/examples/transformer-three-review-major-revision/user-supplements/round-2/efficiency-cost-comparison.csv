@@ -1,0 +1,5 @@
+model,en_de_bleu,en_fr_bleu,training_cost_flops,hardware_note
+GNMT_plus_RL,24.6,39.92,2.3e19,Reported from prior work
+ConvS2S,25.16,40.46,9.6e18,Reported from prior work
+Transformer_base,27.3,38.1,3.3e18,8 NVIDIA P100 GPUs
+Transformer_big,28.4,41.0,2.3e19,8 NVIDIA P100 GPUs

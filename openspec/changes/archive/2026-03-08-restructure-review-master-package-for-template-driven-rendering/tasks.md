@@ -1,0 +1,10 @@
+- [x] 1. Create the new OpenSpec change artifacts for template-driven rendering.
+- [x] 2. Slim `review-master/SKILL.md` down to the core contract and reference index.
+- [x] 3. Reorganize `review-master/references/` into stage-specific instructions plus cross-stage reference docs.
+- [x] 4. Externalize the SQLite schema into `review-master/assets/schema/review-master-schema.yaml`.
+- [x] 5. Externalize the rendered Markdown skeletons into `review-master/assets/templates/` with a render manifest.
+- [x] 6. Rewrite the runtime renderer to load schema and templates from `assets/`.
+- [x] 7. Stop rendering `workflow-state.md` and remove it from the runtime workspace contract.
+- [x] 8. Add runtime-environment confirmation and fallback rules to the skill and helper-script docs.
+- [x] 9. Update playbooks, sample workspaces, and validator fixtures to match the new rendering contract.
+- [x] 10. Run OpenSpec validation, type checking, and workspace validation checks.

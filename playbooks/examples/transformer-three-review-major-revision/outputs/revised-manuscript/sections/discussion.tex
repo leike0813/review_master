@@ -1,0 +1,9 @@
+\section{Discussion}
+
+The main takeaway from these experiments is that attention can serve as the primary computational primitive in a strong translation model. The resulting system trains efficiently and produces excellent benchmark performance.
+
+The evidence is still bounded. The current results are tied to WMT 2014 machine translation and do not by themselves establish that self-attention is universally preferable for every sequence task.
+
+Failure analysis also remains important. Rare words, long subordinate-clause constructions, and some coverage-sensitive cases still account for a meaningful share of residual errors, even though aggregate BLEU improves over prior systems.
+
+Finally, self-attention offers short information paths but can become expensive for very long inputs. The qualitative attention examples are informative, yet they should be interpreted as illustrative analysis rather than definitive mechanistic proof.

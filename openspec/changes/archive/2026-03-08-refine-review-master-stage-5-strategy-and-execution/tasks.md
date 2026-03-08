@@ -1,0 +1,9 @@
+- [x] Add OpenSpec proposal, design, tasks, and Stage 5 specs.
+- [x] Expand `review-master/SKILL.md` with a stronger Stage 5 summary and explicit Stage 5 completion bar.
+- [x] Rewrite `review-master/references/stage-5-strategy-and-execution.md` into an operations-manual document.
+- [x] Refine Stage 5 guidance in `review-master/references/sql-write-recipes.md`.
+- [x] Refine Stage 5 gates and transitions in `review-master/references/workflow-state-machine.md`.
+- [x] Refine Stage 5 script-boundary wording in `review-master/references/helper-scripts.md`.
+- [x] Update `playbooks/review-master-evidence-supplement-playbook.md` to show per-item confirmation, blocker handling, and completion-after-drafts behavior.
+- [x] Validate the change with `openspec validate ... --strict`.
+- [x] Run mypy on the runtime scripts to ensure the documentation-only change did not break type-checked code paths.

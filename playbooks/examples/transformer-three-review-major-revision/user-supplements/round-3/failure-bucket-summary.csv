@@ -1,0 +1,5 @@
+bucket,share_of_reviewed_errors,representative_issue
+rare_words,0.34,Low-frequency named entities remain harder to translate consistently
+long_sentences,0.27,Long subordinate-clause structures still cause occasional reordering issues
+coverage_errors,0.21,Some outputs omit low-salience modifiers under beam search
+agreement_and_morphology,0.18,Target-side agreement remains imperfect in difficult sentences
