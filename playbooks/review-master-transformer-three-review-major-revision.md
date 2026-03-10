@@ -28,6 +28,7 @@
 - 终稿参考与追踪：
   - `playbooks/examples/transformer-three-review-major-revision/reference/accepted-paper.md`
   - `playbooks/examples/transformer-three-review-major-revision/reference/degradation-traceability.md`
+  - 以上 `reference/*` 仅用于案例构造与离线验收，不属于 runtime 中 Agent 的输入读取范围
 - 最终态 workspace：
   - `playbooks/examples/transformer-three-review-major-revision/workspace/`
 - 最终输出：
@@ -74,6 +75,38 @@
 - 不把机制解释和结果解释混成一条
 - 不把复现 protocol 和成本 accounting 混成一条
 - 不把 limitations 和 interpretability 混成一条
+
+## Supplement Intake Scheme
+
+本案例的 Stage 5 补材接收方案固定为“文件级强制判定 + accepted 强制落地”：
+
+- 每个 round 的每个补材文件都必须写入 `supplement_intake_items`
+- 每个文件都必须是 `accepted` 或 `rejected`，并带非空 `decision_rationale`
+- 任何 `accepted` 文件都必须至少有一条 `supplement_landing_links`
+- `supplement_landing_links` 必须指向有效的 `comment_id/action_order/location_order`
+- 所有判定与落地关系统一渲染到 `workspace/supplement-intake-plan.md`
+
+本案例的固定判定结果（摘要）：
+
+- round-1：
+  - accepted：`method-positioning-note.md`、`reproducibility-note.md`、`wmt-decode-settings.tex`
+  - rejected：`round-1-cover-note.md`（仅流程说明，不形成稿件落点）
+- round-2：
+  - accepted：`component-ablation.csv`、`ablation-interpretation-note.md`、`efficiency-cost-comparison.csv`、`efficiency-accounting-note.md`
+  - rejected：`round-2-cover-note.md`
+- round-3：
+  - accepted：`attention-case-study.md`、`attention-pattern-example.svg`、`failure-bucket-summary.csv`、`limitations-and-boundaries.md`
+  - rejected：`round-3-cover-note.md`
+
+## Supplement To Revised-Manuscript Path
+
+这份案例要求可以从补材一路追到最终修订稿段落，主链路如下：
+
+- `round-1/method-positioning-note.md` -> `atomic_001`,`atomic_002` -> `sections/introduction.tex` 与 `sections/background.tex`
+- `round-1/reproducibility-note.md` + `round-1/wmt-decode-settings.tex` -> `atomic_005` -> `sections/training.tex`
+- `round-2/component-ablation.csv` + `round-2/ablation-interpretation-note.md` -> `atomic_003` -> `sections/architecture.tex`,`sections/results.tex`
+- `round-2/efficiency-cost-comparison.csv` + `round-2/efficiency-accounting-note.md` -> `atomic_006`,`atomic_007` -> `sections/results.tex`,`sections/conclusion.tex`
+- `round-3/attention-case-study.md` + `round-3/attention-pattern-example.svg` + `round-3/failure-bucket-summary.csv` + `round-3/limitations-and-boundaries.md` -> `atomic_008`,`atomic_009` -> `sections/results.tex`,`sections/discussion.tex`,`sections/conclusion.tex`
 
 ## Walkthrough
 
@@ -135,6 +168,15 @@ WHERE id = 1;
 - `instruction_payload.resume_packet.resume_status = bootstrap`
 - `instruction_payload.recommended_next_action.action_id = enter_stage_2`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage2_upsert_manuscript_summary`
+
+`gate-and-render` 更新视图：
+
+- `workspace/agent-resume.md`
+- `workspace/manuscript-structure-summary.md`
+- `workspace/raw-review-thread-list.md`
+- `workspace/atomic-review-comment-list.md`
+- `workspace/thread-to-atomic-mapping.md`
+- `workspace/atomic-comment-workboard.md`
 
 为什么可以推进：
 
@@ -201,6 +243,11 @@ INSERT INTO manuscript_sections (
 - `instruction_payload.recommended_next_action.action_id = enter_stage_3`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage3_replace_threaded_atomic_model`
 
+`gate-and-render` 更新视图：
+
+- `workspace/agent-resume.md`
+- `workspace/manuscript-structure-summary.md`
+
 为什么可以推进：
 
 - 结构摘要已经能支撑 reviewer thread 的拆分和 target location 规划
@@ -213,7 +260,6 @@ Agent 先读：
 - `review-master/references/stage-3-comment-atomization.md`
 - `workspace/manuscript-structure-summary.md`
 - `inputs/review-comments.md`
-- `reference/degradation-traceability.md`
 
 Agent 写入：
 
@@ -281,6 +327,13 @@ INSERT INTO raw_thread_atomic_links (thread_id, comment_id, link_order) VALUES
 - `instruction_payload.recommended_next_action.action_id = enter_stage_4`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage4_upsert_atomic_workboard`
 
+`gate-and-render` 更新视图：
+
+- `workspace/agent-resume.md`
+- `workspace/raw-review-thread-list.md`
+- `workspace/atomic-review-comment-list.md`
+- `workspace/thread-to-atomic-mapping.md`
+
 为什么可以推进：
 
 - `workspace/thread-to-atomic-mapping.md` 已能完整展示 15 -> 9 的稳定映射
@@ -294,7 +347,6 @@ Agent 先读：
 - `review-master/references/stage-4-workboard-planning.md`
 - `workspace/thread-to-atomic-mapping.md`
 - `workspace/atomic-comment-workboard.md`
-- `reference/degradation-traceability.md`
 
 Agent 写入：
 
@@ -351,6 +403,12 @@ VALUES (1, 'Confirm the canonical 9-item workboard and the planned supplement or
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage4_set_pending_confirmations`
 - `resume_packet.stage_gate = blocked`
 
+`gate-and-render` 更新视图：
+
+- `workspace/agent-resume.md`
+- `workspace/atomic-comment-workboard.md`
+- `workspace/thread-to-atomic-mapping.md`
+
 为什么停住：
 
 - 这是第一次正式停在 `confirmation-needed`
@@ -394,9 +452,15 @@ Agent 写入：
 - `strategy_card_actions`
 - `strategy_card_evidence_items`
 - `strategy_card_pending_confirmations`
+- `supplement_intake_items`
+- `supplement_landing_links`
 - `comment_completion_status`
 - `workflow_global_blockers`
 - `resume_brief`
+
+补材接收与落地采用：
+
+- `recipe_stage5_replace_supplement_intake_and_landing`
 
 代表性 SQL：
 
@@ -423,9 +487,18 @@ blocked 快照：
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage5_set_blockers`
 - `resume_packet.active_comment_id = atomic_005`
 
+blocked 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_005.md`
+- `workspace/atomic-comment-workboard.md`
+- `workspace/supplement-intake-plan.md`
+
 用户补材吸收后：
 
 - round-1 证据写回 `strategy_card_evidence_items`
+- round-1 文件级 intake 决策写回 `supplement_intake_items`
+- accepted 文件落地映射写回 `supplement_landing_links`
 - `atomic_001`、`atomic_002`、`atomic_004`、`atomic_005` 的 strategy 和 completion 状态补齐
 
 ready 快照：
@@ -434,6 +507,13 @@ ready 快照：
 - `instruction_payload.recommended_next_action.action_id = advance_active_comment`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage5_upsert_completion_status`
 - `resume_packet.active_comment_id = atomic_005`
+
+ready 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_005.md`
+- `workspace/response-letter-outline.md`
+- `workspace/supplement-intake-plan.md`
 
 为什么可以继续：
 
@@ -469,9 +549,15 @@ Agent 写入：
 
 - `strategy_cards`
 - `strategy_card_evidence_items`
+- `supplement_intake_items`
+- `supplement_landing_links`
 - `workflow_global_blockers`
 - `comment_completion_status`
 - `resume_brief`
+
+补材接收与落地采用：
+
+- `recipe_stage5_replace_supplement_intake_and_landing`
 
 代表性 SQL：
 
@@ -497,12 +583,26 @@ blocked 快照：
 - `instruction_payload.recommended_next_action.action_id = resolve_blockers`
 - `resume_packet.active_comment_id = atomic_007`
 
+blocked 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_007.md`
+- `workspace/atomic-comment-workboard.md`
+- `workspace/supplement-intake-plan.md`
+
 ready 快照：
 
 - `stage-5-round-2-ready.json`
 - `instruction_payload.recommended_next_action.action_id = advance_active_comment`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage5_upsert_completion_status`
 - `resume_packet.active_comment_id = atomic_007`
+
+ready 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_007.md`
+- `workspace/response-letter-outline.md`
+- `workspace/supplement-intake-plan.md`
 
 为什么可以继续：
 
@@ -537,9 +637,15 @@ Agent 写入：
 
 - `strategy_cards`
 - `strategy_card_evidence_items`
+- `supplement_intake_items`
+- `supplement_landing_links`
 - `comment_completion_status`
 - `workflow_global_blockers`
 - `resume_brief`
+
+补材接收与落地采用：
+
+- `recipe_stage5_replace_supplement_intake_and_landing`
 
 代表性 SQL：
 
@@ -565,12 +671,26 @@ blocked 快照：
 - `instruction_payload.recommended_next_action.action_id = resolve_blockers`
 - `resume_packet.active_comment_id = atomic_009`
 
+blocked 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_009.md`
+- `workspace/atomic-comment-workboard.md`
+- `workspace/supplement-intake-plan.md`
+
 ready 快照：
 
 - `stage-5-round-3-ready.json`
 - `instruction_payload.recommended_next_action.action_id = advance_active_comment`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage5_upsert_completion_status`
 - `resume_packet.active_comment_id = atomic_009`
+
+ready 快照对应的视图更新：
+
+- `workspace/agent-resume.md`
+- `workspace/response-strategy-cards/atomic_009.md`
+- `workspace/response-letter-outline.md`
+- `workspace/supplement-intake-plan.md`
 
 为什么可以推进到 Stage 6：
 
@@ -582,7 +702,7 @@ ready 快照：
 
 Agent 先读：
 
-- `review-master/references/stage-6-final-assembly.md`
+- `review-master/references/stage-6-final-review-and-export.md`
 - `workspace/final-assembly-checklist.md`
 - `workspace/thread-to-atomic-mapping.md`
 - 最新的 `instruction_payload`
@@ -664,11 +784,29 @@ INSERT INTO export_artifacts (
 - `instruction_payload.recommended_next_action.action_id = final_review_and_clean_export`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage6_export_clean_manuscript`
 
+导出前快照对应的视图更新：
+
+- `workspace/style-profile.md`
+- `workspace/action-copy-variants.md`
+- `workspace/response-letter-outline.md`
+- `workspace/response-letter-table-preview.md`
+- `workspace/response-letter-table-preview.tex`
+- `workspace/export-patch-plan.md`
+- `workspace/final-assembly-checklist.md`
+- `workspace/agent-resume.md`
+
 最终快照：
 
 - `stage-6-completed.json`
 - `instruction_payload.recommended_next_action.action_id = stage_6_completed`
 - `instruction_payload.recommended_next_action.recipe_id = recipe_stage6_export_clean_manuscript`
+
+最终快照对应的视图更新：
+
+- `workspace/final-assembly-checklist.md`
+- `workspace/response-letter-table-preview.md`
+- `workspace/response-letter-table-preview.tex`
+- `workspace/agent-resume.md`
 
 最终闭环检查：
 

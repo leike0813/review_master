@@ -47,6 +47,10 @@ views:
     mode: single
     template: response-letter-table-preview.tex.j2
     output: response-letter-table-preview.tex
+  - name: supplement_intake_plan
+    mode: single
+    template: supplement-intake-plan.md.j2
+    output: supplement-intake-plan.md
   - name: final_checklist
     mode: single
     template: final-assembly-checklist.md.j2

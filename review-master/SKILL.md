@@ -54,6 +54,7 @@ artifact workspace 根目录固定包含：
 - `export-patch-plan.md`
 - `response-letter-table-preview.md`
 - `response-letter-table-preview.tex`
+- `supplement-intake-plan.md`
 - `final-assembly-checklist.md`
 - `response-strategy-cards/{comment_id}.md`
 
@@ -450,6 +451,8 @@ conda run --no-capture-output -n DataProcessing python -u \
 - 写入 `strategy_action_target_locations`
 - 写入 `strategy_card_evidence_items`
 - 写入 `strategy_card_pending_confirmations`
+- 写入 `supplement_intake_items`
+- 写入 `supplement_landing_links`
 - 写入 `comment_completion_status`
 - 若需补材或澄清，写入 `workflow_global_blockers`
 - 更新 `resume_brief`
@@ -464,6 +467,8 @@ conda run --no-capture-output -n DataProcessing python -u \
 - 默认必须先完成逐条策略确认，再进入稿件修改草案和 response 段落草案
 - Stage 4 的总确认不能替代 Stage 5 的局部执行确认
 - 若存在 evidence gap，应显式进入 blocker 路径，请求补材或澄清
+- 每轮补材必须形成文件级接收判定（accepted/rejected + rationale）
+- 被接收的补材必须映射到 `comment_id/action_order/location_order`，并在 `supplement-intake-plan.md` 可追溯
 - 只有当策略卡、证据判断、稿件修改草案、response 段落草案以及一一对应检查都完成后，当前条目才允许标记完成
 - 当前条目闭环后，才允许切换到下一条 atomic item
 
@@ -473,6 +478,7 @@ conda run --no-capture-output -n DataProcessing python -u \
 - 当前条目仍存在待确认事项
 - 当前条目还没有形成足以确认的策略卡
 - 草案尚未形成或一一对应检查尚未稳定
+- 存在补材文件尚未判定接收/拒收，或接收补材尚未完成落地映射
 - `gate-and-render` 返回 blocker 或 repair
 
 完成定义：

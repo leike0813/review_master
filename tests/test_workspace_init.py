@@ -13,6 +13,7 @@ def test_init_creates_bootstrap_workspace(tmp_path: Path) -> None:
     assert (artifact_root / "review-master.db").exists()
     assert (artifact_root / "agent-resume.md").exists()
     assert (artifact_root / "export-patch-plan.md").exists()
+    assert (artifact_root / "supplement-intake-plan.md").exists()
     assert not (artifact_root / "workflow-state.md").exists()
 
 

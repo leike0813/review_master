@@ -10,6 +10,7 @@
 - 1 条原始 reviewer thread
 - 2 条 canonical atomic item
 - 无补材分支
+- Stage 5 仍维持补材接收与落地视图（本样例为空态）
 - 首次调用先走 bootstrap resume
 - Agent 只写 `review-master.db`
 - `gate-and-render` 核心脚本每轮都重渲染 Markdown 视图并给出下一步指令
@@ -99,6 +100,16 @@ WHERE id = 1;
 - `recommended_next_action.recipe_id = recipe_stage2_upsert_manuscript_summary`
 - 说明 Stage 1 已满足进入 Stage 2 的门槛
 
+`gate-and-render` 更新视图：
+
+- `agent-resume.md`
+- `manuscript-structure-summary.md`
+- `raw-review-thread-list.md`
+- `atomic-review-comment-list.md`
+- `thread-to-atomic-mapping.md`
+- `atomic-comment-workboard.md`
+- `supplement-intake-plan.md`
+
 ### Stage 2
 
 Agent 先读：
@@ -137,6 +148,8 @@ VALUES ('sec_intro', 'Introduction', 'State the problem and contribution', 'main
 `gate-and-render` 重渲染：
 
 - `manuscript-structure-summary.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
 
 `gate-and-render` 输出：
 
@@ -231,6 +244,14 @@ INSERT INTO raw_thread_atomic_links (thread_id, comment_id, link_order) VALUES
 - `stage-3-atomic-ready.json`
 - `recommended_next_action = enter_stage_4`
 - `recommended_next_action.recipe_id = recipe_stage4_upsert_atomic_workboard`
+
+`gate-and-render` 更新视图：
+
+- `raw-review-thread-list.md`
+- `atomic-review-comment-list.md`
+- `thread-to-atomic-mapping.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
 
 为什么可以推进：
 
@@ -331,16 +352,21 @@ Agent 写入：
 - `strategy_cards`
 - `strategy_card_actions`
 - `comment_completion_status`
+- `supplement_intake_items`（本样例保持空）
+- `supplement_landing_links`（本样例保持空）
 - 采用：
   - `recipe_stage5_set_active_comment`
   - `recipe_stage5_upsert_strategy_card`
   - `recipe_stage5_replace_strategy_actions`
+  - `recipe_stage5_replace_supplement_intake_and_landing`
   - `recipe_stage5_upsert_completion_status`
 - 更新表：
   - `workflow_state`
-  - `strategy_cards`
-  - `strategy_card_actions`
-  - `comment_completion_status`
+- `strategy_cards`
+- `strategy_card_actions`
+- `comment_completion_status`
+- `supplement_intake_items`
+- `supplement_landing_links`
 
 代表性 SQL：
 
@@ -366,6 +392,8 @@ VALUES (
 `gate-and-render` 重渲染：
 
 - `response-strategy-cards/atomic_001.md`
+- `supplement-intake-plan.md`
+- `agent-resume.md`
 
 `gate-and-render` 输出：
 

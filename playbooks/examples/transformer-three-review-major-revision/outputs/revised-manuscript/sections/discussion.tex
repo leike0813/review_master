@@ -4,6 +4,22 @@ The main takeaway from these experiments is that attention can serve as the prim
 
 The evidence is still bounded. The current results are tied to WMT 2014 machine translation and do not by themselves establish that self-attention is universally preferable for every sequence task.
 
-Failure analysis also remains important. Rare words, long subordinate-clause constructions, and some coverage-sensitive cases still account for a meaningful share of residual errors, even though aggregate BLEU improves over prior systems.
+Failure analysis also remains important. In the reviewed error buckets, rare-word and named-entity cases account for roughly 34\% of residual errors, long-sentence reordering for about 27\%, coverage-related omissions for about 21\%, and agreement/morphology issues for the remaining 18\%. These failure modes persist even though aggregate BLEU improves over prior systems.
 
-Finally, self-attention offers short information paths but can become expensive for very long inputs. The qualitative attention examples are informative, yet they should be interpreted as illustrative analysis rather than definitive mechanistic proof.
+\begin{table}[h]
+\centering
+\caption{Failure buckets from the accepted round-3 supplement.}
+\label{tab:failure-buckets}
+\begin{tabular}{lc}
+\toprule
+Error Bucket & Share of Reviewed Errors \\
+\midrule
+Rare words / named entities & 34\% \\
+Long-sentence reordering & 27\% \\
+Coverage-related omissions & 21\% \\
+Agreement / morphology & 18\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Finally, self-attention offers short information paths but still carries quadratic sequence-length cost, which can become expensive for very long inputs. The qualitative attention examples are informative, yet they should be interpreted as illustrative analysis rather than definitive mechanistic proof.

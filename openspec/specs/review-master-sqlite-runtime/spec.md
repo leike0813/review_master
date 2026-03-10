@@ -14,6 +14,13 @@ The runtime workspace MUST use SQLite as the only writable source of truth.
 - **AND** the runtime Markdown artifacts MUST be treated as read-only rendered views
 - **AND** `workflow-state.yaml` MUST NOT be part of the runtime contract
 
+#### Scenario: supplement intake tables exist in runtime schema
+
+- **WHEN** the runtime database schema is initialized
+- **THEN** it MUST include `supplement_intake_items`
+- **AND** it MUST include `supplement_landing_links`
+- **AND** both tables MUST be part of the required runtime table contract
+
 ### Requirement: stage-four view consolidation
 
 Stage four MUST use a single rendered workboard view.

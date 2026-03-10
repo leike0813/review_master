@@ -54,6 +54,7 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
         "inputs/review-comments.md",
         "inputs/manuscript/main.tex",
         "workspace/review-master.db",
+        "workspace/supplement-intake-plan.md",
         "workspace/thread-to-atomic-mapping.md",
         "workspace/final-assembly-checklist.md",
         "outputs/response-letter.md",

@@ -12,6 +12,7 @@
 - 5 条 canonical atomic item
 - 其中 1 条 atomic item 被两个 reviewer thread 共享
 - 1 次 `stage_5 blocked -> 用户补材 -> 解除 blocked`
+- Stage 5 强制补材文件级 intake 判定与 accepted 落地映射
 - 演示一次中断后重新进入，同样先恢复再继续
 - Agent 只写数据库，用户只读渲染视图
 
@@ -71,6 +72,16 @@ Agent 写入：
 - `stage-1-entry-ready.json`
 - `recommended_next_action.recipe_id = recipe_stage2_upsert_manuscript_summary`
 
+`gate-and-render` 更新视图：
+
+- `agent-resume.md`
+- `manuscript-structure-summary.md`
+- `raw-review-thread-list.md`
+- `atomic-review-comment-list.md`
+- `thread-to-atomic-mapping.md`
+- `atomic-comment-workboard.md`
+- `supplement-intake-plan.md`
+
 ### Stage 2
 
 Agent 写入数据库：
@@ -115,6 +126,12 @@ INSERT INTO manuscript_claims (
 
 - `stage-2-structure-ready.json`
 - `recommended_next_action.recipe_id = recipe_stage3_replace_threaded_atomic_model`
+
+`gate-and-render` 更新视图：
+
+- `manuscript-structure-summary.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
 
 ### Stage 3
 
@@ -181,6 +198,14 @@ INSERT INTO raw_thread_atomic_links (thread_id, comment_id, link_order) VALUES
 - `stage-3-atomic-ready.json`
 - `recommended_next_action.recipe_id = recipe_stage4_upsert_atomic_workboard`
 
+`gate-and-render` 更新视图：
+
+- `raw-review-thread-list.md`
+- `atomic-review-comment-list.md`
+- `thread-to-atomic-mapping.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
+
 ### Stage 4
 
 Agent 写入：
@@ -246,6 +271,7 @@ VALUES (1, 'Please confirm the stage-four processing order and overall revision 
 
 - `atomic-comment-workboard.md`
 - `thread-to-atomic-mapping.md`
+- `supplement-intake-plan.md`（此时通常为空态）
 
 `gate-and-render` 输出：
 
@@ -276,6 +302,13 @@ Agent 写入：
 - `stage-5-comment-ready.json`
 - `recommended_next_action.recipe_id = recipe_stage5_upsert_completion_status`
 
+`gate-and-render` 更新视图：
+
+- `response-strategy-cards/atomic_001.md`
+- `response-letter-outline.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
+
 此时“ready”的含义不是“跳过确认直接执行”，而是：
 
 - 当前策略卡已经成熟到足以面向用户确认
@@ -290,17 +323,22 @@ Agent 写入：
 - `strategy_card_evidence_items`
 - `strategy_card_pending_confirmations`
 - `workflow_global_blockers`
+- `supplement_intake_items`
+- `supplement_landing_links`
 - 采用：
   - `recipe_stage5_set_active_comment`
   - `recipe_stage5_upsert_strategy_card`
   - `recipe_stage5_replace_strategy_evidence`
+  - `recipe_stage5_replace_supplement_intake_and_landing`
   - `recipe_stage5_replace_strategy_pending_confirmations`
   - `recipe_stage5_set_blockers`
 - 更新表：
   - `workflow_state`
-  - `strategy_cards`
-  - `strategy_card_evidence_items`
-  - `workflow_global_blockers`
+- `strategy_cards`
+- `strategy_card_evidence_items`
+- `workflow_global_blockers`
+- `supplement_intake_items`
+- `supplement_landing_links`
 
 代表性 SQL：
 
@@ -324,6 +362,13 @@ VALUES (1, 'Need multi-seed stability results and figure for atomic_004.');
 - `recommended_next_action = resolve_blockers`
 - `recommended_next_action.recipe_id = recipe_stage5_set_blockers`
 
+`gate-and-render` 更新视图：
+
+- `response-strategy-cards/atomic_004.md`
+- `atomic-comment-workboard.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
+
 此时若 Session 中断，新的 Session 重新进入时不直接继续改库，而是先重复统一恢复入口：
 
 1. 运行 `gate-and-render`
@@ -343,6 +388,7 @@ Agent 读取补材后，更新数据库并关闭 blocker。补材到位后，仍
 补材闭环采用：
 
 - `recipe_stage5_replace_strategy_evidence`
+- `recipe_stage5_replace_supplement_intake_and_landing`
 - `recipe_stage5_replace_strategy_pending_confirmations`
 - `recipe_stage5_set_blockers`
 - `recipe_stage5_upsert_completion_status`
@@ -354,10 +400,18 @@ Agent 读取补材后，更新数据库并关闭 blocker。补材到位后，仍
 - `instruction_payload.resume_packet.is_bootstrap = false`
 - `recommended_next_action.recipe_id = recipe_stage5_upsert_completion_status`
 
+`gate-and-render` 更新视图：
+
+- `response-strategy-cards/atomic_004.md`
+- `response-letter-outline.md`
+- `agent-resume.md`
+- `supplement-intake-plan.md`
+
 这一轮恢复到 `ready_to_resume` 后，Agent 应理解为：
 
 - blocker 已解除
 - 当前 item 可以重新进入逐条确认
+- 当前轮每个补材文件都必须有 `accepted/rejected` 与理由，且 accepted 文件必须已有 landing 映射
 - 只有确认完成并形成稿件修改草案、response 段落草案以及一一对应关系后，才可把 `atomic_004` 标记为完成
 
 ### Stage 6

@@ -59,6 +59,7 @@ def test_failure_recovery_example_structure() -> None:
         "user-supplements/round-2-good/stability-results.csv",
         "user-supplements/round-2-good/supplement-note.md",
         "workspace/review-master.db",
+        "workspace/supplement-intake-plan.md",
         "workspace/response-strategy-cards/atomic_004.md",
         "outputs/response-letter.tex",
     ]

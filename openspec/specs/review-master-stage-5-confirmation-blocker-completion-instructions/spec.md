@@ -10,6 +10,7 @@ Stage 5 MUST explicitly define:
 - when confirmation is required
 - when a blocker must be written
 - when a comment may be marked complete
+- when supplement intake and landing are considered complete enough to clear blocker
 
 #### Scenario: Evidence gap creates a blocker
 
@@ -17,6 +18,20 @@ Stage 5 MUST explicitly define:
 - **When** the Agent judges `evidence_gap = yes`
 - **Then** the docs must require a blocker to be written
 - **And** the docs must forbid marking the item complete until the blocker is cleared
+
+#### Scenario: Supplement intake is incomplete
+
+- **Given** user supplements were provided for the active round
+- **When** at least one supplement file has no intake decision or no rationale
+- **Then** Stage 5 MUST remain blocked
+- **And** the docs must require completing file-level intake decisions before resuming
+
+#### Scenario: Accepted supplement has no landing mapping
+
+- **Given** a supplement file is marked `accepted`
+- **When** that file has no mapping to any `comment_id/action_order/location_order`
+- **Then** Stage 5 MUST remain blocked
+- **And** the docs must require completing landing mappings before clearing blocker
 
 #### Scenario: Completion requires landed drafts
 

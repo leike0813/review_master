@@ -65,6 +65,10 @@ enums:
     - blocked
     - ready_to_resume
     - completed
+  supplement_decision:
+    - ""
+    - accepted
+    - rejected
 
 required_tables:
   - manuscript_summary
@@ -82,6 +86,8 @@ required_tables:
   - strategy_action_target_locations
   - strategy_card_evidence_items
   - strategy_card_pending_confirmations
+  - supplement_intake_items
+  - supplement_landing_links
   - comment_completion_status
   - response_thread_resolution_links
   - style_profiles
@@ -236,6 +242,33 @@ tables:
           confirmation_order INTEGER NOT NULL,
           message TEXT NOT NULL,
           PRIMARY KEY (comment_id, confirmation_order)
+      )
+  - name: supplement_intake_items
+    sql: |
+      CREATE TABLE IF NOT EXISTS supplement_intake_items (
+          round_id TEXT NOT NULL,
+          file_path TEXT NOT NULL,
+          concern_summary TEXT NOT NULL DEFAULT '',
+          decision TEXT NOT NULL DEFAULT '' CHECK (decision IN ('', 'accepted', 'rejected')),
+          decision_rationale TEXT NOT NULL DEFAULT '',
+          PRIMARY KEY (round_id, file_path)
+      )
+  - name: supplement_landing_links
+    sql: |
+      CREATE TABLE IF NOT EXISTS supplement_landing_links (
+          round_id TEXT NOT NULL,
+          file_path TEXT NOT NULL,
+          comment_id TEXT NOT NULL,
+          action_order INTEGER NOT NULL,
+          location_order INTEGER NOT NULL,
+          planned_usage_note TEXT NOT NULL DEFAULT '',
+          PRIMARY KEY (round_id, file_path, comment_id, action_order, location_order),
+          FOREIGN KEY (round_id, file_path)
+              REFERENCES supplement_intake_items(round_id, file_path)
+              ON DELETE CASCADE,
+          FOREIGN KEY (comment_id, action_order, location_order)
+              REFERENCES strategy_action_target_locations(comment_id, action_order, location_order)
+              ON DELETE CASCADE
       )
   - name: comment_completion_status
     sql: |

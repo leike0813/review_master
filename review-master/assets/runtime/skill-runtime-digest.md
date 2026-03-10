@@ -25,6 +25,7 @@
 - 每次写库后都必须运行 `gate-and-render` 核心脚本
 - 有 `pending_user_confirmations` 时先请求确认
 - 有 `global_blockers` 时先请求补材或澄清
+- 每轮补材都要形成文件级 intake 判定；`accepted` 补材必须有落地映射
 - `active_comment_id` 非空时，不得静默切换 comment
 - 不满足导出门禁时，禁止导出 marked manuscript 之后的任何最终文件
 - Stage 6 manuscript 导出必须先写实 `export_patch_sets` 与 `export_patches`
@@ -37,7 +38,7 @@
 - 必需输入：`manuscript_source`、`review_comments_source`
 - 可选输入：`editor_letter_source`、`user_notes`
 - 运行时真源：`review-master.db`
-- 只读视图：`agent-resume.md`、`manuscript-structure-summary.md`、`raw-review-thread-list.md`、`atomic-review-comment-list.md`、`thread-to-atomic-mapping.md`、`atomic-comment-workboard.md`、`style-profile.md`、`action-copy-variants.md`、`response-letter-outline.md`、`export-patch-plan.md`、`response-letter-table-preview.md`、`response-letter-table-preview.tex`、`final-assembly-checklist.md`、`response-strategy-cards/{comment_id}.md`
+- 只读视图：`agent-resume.md`、`manuscript-structure-summary.md`、`raw-review-thread-list.md`、`atomic-review-comment-list.md`、`thread-to-atomic-mapping.md`、`atomic-comment-workboard.md`、`style-profile.md`、`action-copy-variants.md`、`response-letter-outline.md`、`export-patch-plan.md`、`response-letter-table-preview.md`、`response-letter-table-preview.tex`、`supplement-intake-plan.md`、`final-assembly-checklist.md`、`response-strategy-cards/{comment_id}.md`
 - 最终输出：`marked_manuscript`、`clean_manuscript`、`response_markdown`、`response_latex`
 
 ## Six Stages

@@ -13,6 +13,7 @@ At minimum, `SKILL.md` MUST define the role of:
 - comment-to-manuscript mapping table
 - priority and dependency revision board
 - per-comment response strategy cards
+- supplement intake and landing plan
 - final assembly checklist
 
 #### Scenario: Artifacts are readable and confirmable
@@ -29,6 +30,10 @@ At minimum, `SKILL.md` MUST define the role of:
 #### Scenario: Strategy card is generated before per-comment confirmation
 - **WHEN** one atomic review comment enters stage 5
 - **THEN** `SKILL.md` requires generation of a per-comment strategy card before asking the user to confirm that comment
+
+#### Scenario: Supplement intake plan is generated before blocker is cleared
+- **WHEN** stage 5 receives a supplement round for a blocked item
+- **THEN** `SKILL.md` requires generation (or refresh) of supplement intake and landing plan before resuming execution
 
 ### Requirement: No template files required in this change
 This change MUST define the Markdown artifacts in `SKILL.md` without requiring dedicated template files under `review-master/references/`.

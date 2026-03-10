@@ -9,6 +9,7 @@
 - 第一轮补材已经“给了东西”，但语义上没有回答 reviewer 的真正关切
 - Agent 必须判断 failure 原因是 concern mismatch，而不是把“材料存在”误判成“证据已足够”
 - 第二轮补材才真正关闭 blocker，并最终恢复到 `stage_6_completed`
+- Stage 5 每轮都通过 `supplement_intake_items` 与 `supplement_landing_links` 显式记录补材判定与落地
 
 ## Example Assets
 
@@ -70,6 +71,13 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 - `stage-3-atomic-ready.json`
 - `stage-4-workboard-confirmation-needed.json`
 
+对应视图主入口：
+
+- `workspace/agent-resume.md`
+- `workspace/atomic-comment-workboard.md`
+- `workspace/response-strategy-cards/atomic_004.md`
+- `workspace/supplement-intake-plan.md`
+
 ### Stage 5A: Initial Blocker
 
 在任何补材到位之前，案例先停在：
@@ -81,6 +89,11 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 - `active_comment_id = atomic_004`
 - `recommended_next_action = resolve_blockers`
 - open loop 仍是“需要稳定性结果与 figure”
+
+并且在数据库中：
+
+- `supplement_intake_items` 仍缺少可关闭 blocker 的有效证据判定
+- `supplement_landing_links` 尚未形成可执行落地映射
 
 这一步只是正常 blocker，不是 failure。
 
@@ -95,6 +108,12 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 此时案例进入：
 
 - `stage-5-after-bad-supplement-blocked.json`
+
+对应的补材 intake/landing 规则：
+
+- 每个 round-1 文件都必须有 `decision` 与 `decision_rationale`
+- 当前 round-1 文件可以存在且被判定，但因为 concern mismatch 仍可整体保持 blocked
+- 被判定为 `accepted` 的文件若没有 landing 映射，Stage 5 仍必须 blocked
 
 必须这样解释 failure：
 
@@ -111,6 +130,7 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 - `stage-5-after-bad-supplement-agent-resume.md`
 - `stage-5-after-bad-supplement-atomic-comment-workboard.md`
 - `stage-5-after-bad-supplement-atomic_004-strategy-card.md`
+- `workspace/supplement-intake-plan.md`
 
 其中最关键的是策略卡会明确写出：
 
@@ -128,6 +148,11 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 此时案例进入：
 
 - `stage-5-after-good-supplement-ready.json`
+
+并且：
+
+- `supplement_intake_items` 已完成该轮文件级 `accepted/rejected` 判定
+- `supplement_landing_links` 已把 accepted 文件映射到 `atomic_004` 的 action/location
 
 状态语义固定为：
 
@@ -148,6 +173,7 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 
 - `workspace/agent-resume.md` 记录了“round-1 被拒绝、round-2 被接受”的决策历史
 - `workspace/response-strategy-cards/atomic_004.md` 保留了两轮补材的 evidence history
+- `workspace/supplement-intake-plan.md` 展示每个补材文件的判定与落地映射
 - `workspace/final-assembly-checklist.md` 与 outputs 说明最终所有导出产物都已落地
 
 ## Failure Judgment Rule
@@ -177,7 +203,8 @@ Stage 1 到 Stage 4 与 `evidence-supplement-multi-review` 的主线保持一致
 7. `stage-5-after-good-supplement-ready.json`
 8. `workspace/agent-resume.md`
 9. `workspace/response-strategy-cards/atomic_004.md`
-10. `stage-6-completed.json`
+10. `workspace/supplement-intake-plan.md`
+11. `stage-6-completed.json`
 
 这样最容易看清：
 

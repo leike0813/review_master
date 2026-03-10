@@ -11,7 +11,7 @@
 | DG-05 | `sections/results.tex` | 只保留 headline BLEU 表述，删除了变体分析和对“哪些组件带来收益”的解释。 | `R1.3`; `R2.4`; `R2.5` | `user-supplements/round-2/component-ablation.csv`; `user-supplements/round-2/ablation-interpretation-note.md` |
 | DG-06 | `sections/results.tex`; `sections/conclusion.tex` | 保留训练成本优势结论，但删除了 FLOPs 口径、硬件边界和跨模型比较限定。 | `R2.3`; `R3.5` | `user-supplements/round-2/efficiency-cost-comparison.csv`; `user-supplements/round-2/efficiency-accounting-note.md` |
 | DG-07 | `sections/discussion.tex` | 将局限性、失败模式和外推边界压缩成一小段，删除了更明确的风险讨论。 | `R3.1`; `R3.3`; `R3.5` | `user-supplements/round-3/failure-bucket-summary.csv`; `user-supplements/round-3/limitations-and-boundaries.md`; `user-supplements/round-3/round-3-cover-note.md` |
-| DG-08 | `sections/results.tex`; `sections/discussion.tex` | 移除了注意力可解释性的具体示例与定性分析，只保留一条轻量断言。 | `R3.2`; `R3.4` | `user-supplements/round-3/attention-case-study.md`; `user-supplements/round-3/attention-pattern-example.svg` |
+| DG-08 | `sections/results.tex`; `sections/discussion.tex` | 移除了注意力可解释性的具体示例与定性分析，只保留一条轻量断言。 | `R3.2`; `R3.4` | `user-supplements/round-3/attention-case-study.md`; `user-supplements/round-3/attention-pattern-example.svg`; `user-supplements/round-3/attention-pattern-example.pdf` |
 
 ## Round Summary
 

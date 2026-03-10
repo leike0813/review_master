@@ -18,6 +18,7 @@ def test_sample_workspaces_gate_and_render_regression(tmp_path: Path) -> None:
         )
         payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
         assert payload["status"] == "ok"
+        assert payload["artifact_presence"]["supplement_intake_plan_view"]["status"] == "present"
         assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
         assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_export_clean_manuscript"
 
@@ -34,3 +35,5 @@ def test_sample_response_latex_outputs_have_front_matter() -> None:
         assert "\\documentclass" in text
         assert "\\begin{document}" in text
         assert "\\end{document}" in text
+        assert "\\subsection*{ reviewer_" not in text
+        assert "\\subsection*{ reviewer\\_" in text

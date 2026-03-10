@@ -32,6 +32,7 @@ RESPONSE_LETTER_OUTLINE_MD = "response-letter-outline.md"
 EXPORT_PATCH_PLAN_MD = "export-patch-plan.md"
 RESPONSE_TABLE_PREVIEW_MD = "response-letter-table-preview.md"
 RESPONSE_TABLE_PREVIEW_TEX = "response-letter-table-preview.tex"
+SUPPLEMENT_INTAKE_PLAN_MD = "supplement-intake-plan.md"
 FINAL_CHECKLIST_MD = "final-assembly-checklist.md"
 STRATEGY_CARD_DIR = "response-strategy-cards"
 
@@ -59,6 +60,7 @@ DEFAULT_ENUMS = {
     "artifact_name": {"marked_manuscript", "clean_manuscript", "response_markdown", "response_latex"},
     "artifact_status": {"pending", "ready", "exported"},
     "resume_status": {"bootstrap", "active", "blocked", "ready_to_resume", "completed"},
+    "supplement_decision": {"", "accepted", "rejected"},
 }
 
 TARGET_LOCATION_RE = re.compile(r"^[^:\n|]+::[^:\n|]+::[^:\n|]+$")
@@ -87,6 +89,8 @@ REPAIR_PRIORITY = {
     "export_patch_sets": 19,
     "export_patches": 20,
     "export_artifacts": 21,
+    "supplement_intake_items": 22,
+    "supplement_landing_links": 23,
 }
 
 
@@ -151,6 +155,7 @@ ALLOWED_VARIANT_LABEL = enum_values("variant_label")
 ALLOWED_ARTIFACT_NAME = enum_values("artifact_name")
 ALLOWED_ARTIFACT_STATUS = enum_values("artifact_status")
 ALLOWED_RESUME_STATUS = enum_values("resume_status")
+ALLOWED_SUPPLEMENT_DECISION = enum_values("supplement_decision")
 
 
 def connect_db(db_path: Path) -> sqlite3.Connection:
@@ -201,6 +206,7 @@ def artifact_paths(artifact_root: Path) -> dict[str, Path]:
         "export_patch_plan_md": artifact_root / EXPORT_PATCH_PLAN_MD,
         "response_table_preview_md": artifact_root / RESPONSE_TABLE_PREVIEW_MD,
         "response_table_preview_tex": artifact_root / RESPONSE_TABLE_PREVIEW_TEX,
+        "supplement_intake_plan_md": artifact_root / SUPPLEMENT_INTAKE_PLAN_MD,
         "final_checklist_md": artifact_root / FINAL_CHECKLIST_MD,
         "strategy_card_dir": artifact_root / STRATEGY_CARD_DIR,
     }
@@ -884,7 +890,14 @@ def build_response_letter_table_preview_context(connection: sqlite3.Connection) 
     groups: dict[str, dict[str, Any]] = {}
     for row in rows:
         reviewer_id = str(row["reviewer_id"])
-        group = groups.setdefault(reviewer_id, {"heading": reviewer_id, "rows": []})
+        group = groups.setdefault(
+            reviewer_id,
+            {
+                "heading": reviewer_id,
+                "heading_tex": tex_escape(reviewer_id),
+                "rows": [],
+            },
+        )
         group["rows"].append(
             {
                 "thread_id": str(row["thread_id"]),
@@ -899,6 +912,52 @@ def build_response_letter_table_preview_context(connection: sqlite3.Connection) 
             }
         )
     return {"reviewer_groups": [groups[key] for key in sorted(groups)]}
+
+
+def build_supplement_intake_plan_context(connection: sqlite3.Connection) -> dict[str, Any]:
+    intake_rows = fetch_all(
+        connection,
+        """
+        SELECT round_id, file_path, concern_summary, decision, decision_rationale
+        FROM supplement_intake_items
+        ORDER BY round_id, file_path
+        """,
+    )
+    landing_rows = fetch_all(
+        connection,
+        """
+        SELECT round_id, file_path, comment_id, action_order, location_order, planned_usage_note
+        FROM supplement_landing_links
+        ORDER BY round_id, file_path, comment_id, action_order, location_order
+        """,
+    )
+    landing_index: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for row in landing_rows:
+        key = (str(row["round_id"]), str(row["file_path"]))
+        landing_index[key].append(
+            {
+                "comment_id": str(row["comment_id"]),
+                "action_order": int(row["action_order"]),
+                "location_order": int(row["location_order"]),
+                "planned_usage_note": str(row["planned_usage_note"]),
+            }
+        )
+
+    grouped: dict[str, dict[str, Any]] = {}
+    for row in intake_rows:
+        round_id = str(row["round_id"])
+        file_path = str(row["file_path"])
+        group = grouped.setdefault(round_id, {"round_id": round_id, "items": []})
+        group["items"].append(
+            {
+                "file_path": file_path,
+                "concern_summary": str(row["concern_summary"]),
+                "decision": str(row["decision"]),
+                "decision_rationale": str(row["decision_rationale"]),
+                "landing_links": landing_index.get((round_id, file_path), []),
+            }
+        )
+    return {"round_groups": [grouped[key] for key in sorted(grouped)]}
 
 
 def build_final_checklist_context(connection: sqlite3.Connection) -> dict[str, Any]:
@@ -1107,6 +1166,8 @@ def get_view_context(
         return build_response_letter_table_preview_context(connection)
     if view_name == "response_letter_table_preview_tex":
         return build_response_letter_table_preview_context(connection)
+    if view_name == "supplement_intake_plan":
+        return build_supplement_intake_plan_context(connection)
     if view_name == "final_checklist":
         return build_final_checklist_context(connection)
     if view_name == "response_strategy_card":

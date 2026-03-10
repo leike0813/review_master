@@ -22,6 +22,7 @@ from workspace_db import (
     ALLOWED_STAGE,
     ALLOWED_STAGE_GATE,
     ALLOWED_STATUS,
+    ALLOWED_SUPPLEMENT_DECISION,
     ALLOWED_VARIANT_LABEL,
     ALLOWED_YES_NO,
     ATOMIC_COMMENTS_MD,
@@ -33,6 +34,7 @@ from workspace_db import (
     RAW_REVIEW_THREADS_MD,
     REPAIR_PRIORITY,
     RESPONSE_LETTER_OUTLINE_MD,
+    SUPPLEMENT_INTAKE_PLAN_MD,
     RESPONSE_TABLE_PREVIEW_MD,
     RESPONSE_TABLE_PREVIEW_TEX,
     STYLE_PROFILE_MD,
@@ -159,6 +161,10 @@ def build_presence_report(artifact_root: Path) -> tuple[dict[str, dict[str, Any]
         "response_letter_table_preview_tex_view": {
             "path": str(paths["response_table_preview_tex"]),
             "status": "present" if paths["response_table_preview_tex"].exists() else "missing",
+        },
+        "supplement_intake_plan_view": {
+            "path": str(paths["supplement_intake_plan_md"]),
+            "status": "present" if paths["supplement_intake_plan_md"].exists() else "missing",
         },
         "final_checklist_view": {
             "path": str(paths["final_checklist_md"]),
@@ -299,6 +305,22 @@ def load_supporting_maps(connection: sqlite3.Connection) -> dict[str, Any]:
         ORDER BY patch_set_id, patch_order
         """,
     )
+    supplement_intake_items = fetch_all(
+        connection,
+        """
+        SELECT round_id, file_path, concern_summary, decision, decision_rationale
+        FROM supplement_intake_items
+        ORDER BY round_id, file_path
+        """,
+    )
+    supplement_landing_links = fetch_all(
+        connection,
+        """
+        SELECT round_id, file_path, comment_id, action_order, location_order, planned_usage_note
+        FROM supplement_landing_links
+        ORDER BY round_id, file_path, comment_id, action_order, location_order
+        """,
+    )
     return {
         "raw_thread_links": raw_thread_links,
         "atomic_source_spans": atomic_source_spans,
@@ -314,6 +336,8 @@ def load_supporting_maps(connection: sqlite3.Connection) -> dict[str, Any]:
         "export_patch_sets": export_patch_sets,
         "export_patches": export_patches,
         "export_artifacts": export_artifacts,
+        "supplement_intake_items": supplement_intake_items,
+        "supplement_landing_links": supplement_landing_links,
     }
 
 
@@ -593,6 +617,99 @@ def validate_database_content(
             add_issue(format_errors, "strategy_card_evidence_items", "missing_required_field", "required_material must be non-empty", path=db_path, comment_id=comment_id)
         if str(row["available_now"]) not in ALLOWED_YES_NO:
             add_issue(format_errors, "strategy_card_evidence_items", "invalid_enum", f"available_now='{row['available_now']}' is not allowed", path=db_path, comment_id=comment_id)
+
+    intake_keys: set[tuple[str, str]] = set()
+    accepted_keys: set[tuple[str, str]] = set()
+    for row in support["supplement_intake_items"]:
+        round_id = str(row["round_id"])
+        file_path = str(row["file_path"])
+        key = (round_id, file_path)
+        intake_keys.add(key)
+        if not round_id.strip():
+            add_issue(
+                format_errors,
+                "supplement_intake_items",
+                "missing_required_field",
+                "round_id must be non-empty",
+                path=db_path,
+            )
+        if not file_path.strip():
+            add_issue(
+                format_errors,
+                "supplement_intake_items",
+                "missing_required_field",
+                "file_path must be non-empty",
+                path=db_path,
+            )
+        decision = str(row["decision"])
+        if decision not in ALLOWED_SUPPLEMENT_DECISION:
+            add_issue(
+                format_errors,
+                "supplement_intake_items",
+                "invalid_enum",
+                f"decision='{decision}' is not allowed",
+                path=db_path,
+            )
+        if decision in {"accepted", "rejected"} and not str(row["decision_rationale"]).strip():
+            add_issue(
+                format_errors,
+                "supplement_intake_items",
+                "missing_required_field",
+                "decision_rationale must be non-empty when decision is accepted/rejected",
+                path=db_path,
+            )
+        if decision == "accepted":
+            accepted_keys.add(key)
+
+    landing_keys: set[tuple[str, str]] = set()
+    for row in support["supplement_landing_links"]:
+        round_id = str(row["round_id"])
+        file_path = str(row["file_path"])
+        key = (round_id, file_path)
+        landing_keys.add(key)
+        comment_id = str(row["comment_id"])
+        action_order = int(row["action_order"])
+        location_order = int(row["location_order"])
+        if not str(row["planned_usage_note"]).strip():
+            add_issue(
+                format_errors,
+                "supplement_landing_links",
+                "missing_required_field",
+                "planned_usage_note must be non-empty",
+                path=db_path,
+                comment_id=comment_id,
+            )
+        if key not in intake_keys:
+            add_issue(
+                format_errors,
+                "supplement_landing_links",
+                "missing_parent_intake_record",
+                f"landing link ({round_id}, {file_path}) has no parent supplement_intake_items record",
+                path=db_path,
+                comment_id=comment_id,
+            )
+        if location_order not in action_location_orders.get((comment_id, action_order), []):
+            add_issue(
+                format_errors,
+                "supplement_landing_links",
+                "invalid_action_location_reference",
+                (
+                    f"landing link references ({comment_id}, action {action_order}, location {location_order}) "
+                    "which is missing in strategy_action_target_locations"
+                ),
+                path=db_path,
+                comment_id=comment_id,
+            )
+
+    for round_id, file_path in sorted(accepted_keys):
+        if (round_id, file_path) not in landing_keys:
+            add_issue(
+                format_errors,
+                "supplement_landing_links",
+                "missing_landing_for_accepted_supplement",
+                f"accepted supplement '{file_path}' in round '{round_id}' has no landing mapping",
+                path=db_path,
+            )
 
     for row in support["response_links"]:
         thread_id = str(row["thread_id"])
@@ -1014,14 +1131,70 @@ def validate_consistency(
             add_issue(consistency_errors, "workflow_state", "missing_active_comment", "stage_5 requires active_comment_id", path=db_path)
         if active_comment_id and active_comment_id not in strategy_map and not pending and not blockers:
             add_issue(consistency_errors, "workflow_state", "stage_gate_without_authored_prerequisites", "stage_5 is ready but active comment has no strategy card", path=db_path, comment_id=active_comment_id)
+        with connect_db(db_path) as connection:
+            intake_rows = fetch_all(
+                connection,
+                """
+                SELECT round_id, file_path, decision, decision_rationale
+                FROM supplement_intake_items
+                ORDER BY round_id, file_path
+                """,
+            )
+            landing_rows = fetch_all(
+                connection,
+                """
+                SELECT round_id, file_path
+                FROM supplement_landing_links
+                ORDER BY round_id, file_path
+                """,
+            )
+        if intake_rows:
+            landing_keys = {(str(row["round_id"]), str(row["file_path"])) for row in landing_rows}
+            for row in intake_rows:
+                round_id = str(row["round_id"])
+                file_path = str(row["file_path"])
+                decision = str(row["decision"])
+                if not decision:
+                    add_issue(
+                        consistency_errors,
+                        "workflow_state",
+                        "stage_gate_without_authored_prerequisites",
+                        (
+                            "stage_5 is ready but supplement intake contains pending decision "
+                            f"for round '{round_id}' file '{file_path}'"
+                        ),
+                        path=db_path,
+                    )
+                if decision in {"accepted", "rejected"} and not str(row["decision_rationale"]).strip():
+                    add_issue(
+                        consistency_errors,
+                        "workflow_state",
+                        "stage_gate_without_authored_prerequisites",
+                        (
+                            "stage_5 is ready but supplement intake decision lacks rationale "
+                            f"for round '{round_id}' file '{file_path}'"
+                        ),
+                        path=db_path,
+                    )
+                if decision == "accepted" and (round_id, file_path) not in landing_keys:
+                    add_issue(
+                        consistency_errors,
+                        "workflow_state",
+                        "stage_gate_without_authored_prerequisites",
+                        (
+                            "stage_5 is ready but accepted supplement has no landing mapping: "
+                            f"round '{round_id}' file '{file_path}'"
+                        ),
+                        path=db_path,
+                    )
     if current_stage == "stage_6":
         if not completion_map:
             add_issue(consistency_errors, "workflow_state", "stage_gate_without_authored_prerequisites", "stage_6 is ready but comment_completion_status is empty", path=db_path)
         if blockers:
             add_issue(consistency_errors, "workflow_state", "blocked_stage_marked_ready", "stage_6 is ready but global blockers are still present", path=db_path)
         for profile_target in ("manuscript", "response_letter"):
-            row = style_profile_map.get(profile_target)
-            if row is None or not str(row["profile_summary"]).strip():
+            profile_row = style_profile_map.get(profile_target)
+            if profile_row is None or not str(profile_row["profile_summary"]).strip():
                 add_issue(
                     consistency_errors,
                     "workflow_state",
@@ -1130,6 +1303,8 @@ def build_repair_sequence(
         "export_patch_sets": "recipe_stage6_replace_export_patches",
         "export_patches": "recipe_stage6_replace_export_patches",
         "export_artifacts": "recipe_stage6_export_marked_manuscript",
+        "supplement_intake_items": "recipe_stage5_replace_supplement_intake_and_landing",
+        "supplement_landing_links": "recipe_stage5_replace_supplement_intake_and_landing",
     }
     target_map = {
         "workflow_state": ["review-master.db"],
@@ -1155,6 +1330,8 @@ def build_repair_sequence(
         "export_patch_sets": ["review-master.db", EXPORT_PATCH_PLAN_MD],
         "export_patches": ["review-master.db", EXPORT_PATCH_PLAN_MD],
         "export_artifacts": ["review-master.db", FINAL_CHECKLIST_MD],
+        "supplement_intake_items": ["review-master.db", SUPPLEMENT_INTAKE_PLAN_MD],
+        "supplement_landing_links": ["review-master.db", SUPPLEMENT_INTAKE_PLAN_MD],
     }
     instruction_map = {
         "workflow_state": "先在 review-master.db 中修正 workflow_state、pending confirmations 或 blockers 相关记录，再重新运行 gate-and-render 核心脚本并重渲染视图。",
@@ -1180,6 +1357,8 @@ def build_repair_sequence(
         "export_patch_sets": "先在 review-master.db 中修正 export_patch_sets，再重新运行 gate-and-render 核心脚本并重渲染视图。",
         "export_patches": "先在 review-master.db 中修正 export_patches，再重新运行 gate-and-render 核心脚本并重渲染视图。",
         "export_artifacts": "先在 review-master.db 中修正 export_artifacts，再重新运行 gate-and-render 核心脚本并重渲染视图。",
+        "supplement_intake_items": "先在 review-master.db 中修正 supplement_intake_items，再重新运行 gate-and-render 核心脚本并重渲染补材接收与落地方案视图。",
+        "supplement_landing_links": "先在 review-master.db 中修正 supplement_landing_links，再重新运行 gate-and-render 核心脚本并重渲染补材接收与落地方案视图。",
     }
     for index, ((artifact, _comment_id), details) in enumerate(ordered, start=1):
         repairs.append(
@@ -1357,9 +1536,9 @@ def build_blocked_actions(
             blocked.append(
                 make_action(
                     "blocked_complete_active_comment",
-                    f"禁止把 {active_comment_id} 标记为完成。先关闭数据库状态中的 blocker 或证据缺口。",
+                    f"禁止把 {active_comment_id} 标记为完成。先关闭数据库状态中的 blocker 或证据缺口，并补齐补材接收与落地映射。",
                     "当前仍有 blocker。",
-                    ["review-master.db"],
+                    ["review-master.db", SUPPLEMENT_INTAKE_PLAN_MD],
                     recipe_id="recipe_stage5_set_blockers",
                 )
             )
@@ -1444,9 +1623,9 @@ def build_stage_actions(
         return [
             make_action(
                 "resolve_blockers",
-                "先根据 review-master.db 中的 blockers 请求补材、澄清或额外输入，关闭 blocker 后再继续。",
+                "先根据 review-master.db 中的 blockers 请求补材、澄清或额外输入，并在补材接收后写实 supplement intake/landing，再关闭 blocker 继续。",
                 "当前存在 global_blockers。",
-                ["review-master.db"],
+                ["review-master.db", SUPPLEMENT_INTAKE_PLAN_MD],
                 recipe_id="recipe_stage5_set_blockers",
             )
         ]
@@ -1506,9 +1685,9 @@ def build_stage_actions(
             return [
                 make_action(
                     "advance_active_comment",
-                    f"继续围绕 {active_comment_id} 更新 review-master.db 中的策略、动作位置、证据、完成状态和 workflow_state，然后重新运行 gate-and-render 核心脚本。",
+                    f"继续围绕 {active_comment_id} 更新 review-master.db 中的策略、动作位置、证据、补材接收落地、完成状态和 workflow_state，然后重新运行 gate-and-render 核心脚本。",
                     "当前 active comment 已具备继续推进条件。",
-                    ["review-master.db", f"{STRATEGY_CARD_DIR}/{active_comment_id}.md"],
+                    ["review-master.db", f"{STRATEGY_CARD_DIR}/{active_comment_id}.md", SUPPLEMENT_INTAKE_PLAN_MD],
                     recipe_id="recipe_stage5_upsert_completion_status",
                 )
             ]

@@ -69,6 +69,10 @@
   - 记录需要的证据、现有证据和缺口
 - `strategy_card_pending_confirmations`
   - 记录该条策略卡在执行前仍需用户确认的事项
+- `supplement_intake_items`
+  - 记录本轮每个补材文件的接收判定（accepted/rejected）与理由
+- `supplement_landing_links`
+  - 对 accepted 补材记录其落地到 `comment_id/action_order/location_order` 的映射
 
 ### 3. 执行前逐条确认
 
@@ -93,6 +97,8 @@ Stage 5 默认要求逐条策略确认。
 - 策略立场仍依赖用户补充事实或明确授权
 - 修改动作会显著改变主线、核心 claim 或关键实验结论
 - 当前 item 无法在不追加用户决策的情况下安全推进
+- 本轮存在补材文件尚未给出接收/拒收判定
+- 本轮存在 accepted 补材但未完成落地映射
 
 一旦 blocker 成立：
 
@@ -150,6 +156,8 @@ Stage 5 默认要求逐条策略确认。
 - 位置已经明确，但证据仍缺
 - 立场已经想好，但材料还没到
 - 用户尚未授权高风险改写
+- 补材已读但未形成 intake 判定
+- 补材已接收但没有 action/location 级落地映射
 
 这些情况下，不得因为“策略已想清楚”就把条目标记为完成。
 

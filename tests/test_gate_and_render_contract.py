@@ -17,6 +17,7 @@ def test_runtime_digest_and_skill_contract_terms_align() -> None:
         "gate-and-render",
         "export_patch_sets",
         "export_patches",
+        "supplement-intake-plan.md",
     ]:
         assert marker in skill_text
         assert marker in digest_text

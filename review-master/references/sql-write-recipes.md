@@ -285,6 +285,33 @@
   - 当前 item 的证据结构已可判断为“足够”或“存在缺口”
   - 若缺口成立，应继续进入 blocker 处理，而不是直接标记完成
 
+## `recipe_stage5_replace_supplement_intake_and_landing`
+
+- 适用阶段：`stage_5`
+- 何时使用：用户提交补材后，需要形成文件级接收判定与落地映射时
+- 必须更新的表：
+  - `supplement_intake_items`
+  - `supplement_landing_links`
+  - 视情况更新 `workflow_global_blockers`
+  - 视情况更新 `resume_open_loops`
+  - `resume_brief`
+- 推荐 SQL 顺序：
+  1. `PRAGMA foreign_keys = ON`
+  2. `DELETE FROM supplement_landing_links WHERE round_id = ?`
+  3. `DELETE FROM supplement_intake_items WHERE round_id = ?`
+  4. 批量插入新的 `supplement_intake_items`
+  5. 批量插入新的 `supplement_landing_links`（仅 accepted 补材）
+  6. `UPDATE resume_brief ...`
+  7. 根据是否仍有缺口刷新 `workflow_global_blockers` 与 `resume_open_loops`
+- 进入这条 recipe 之前应先确认：
+  - 当前补材轮次对应的文件清单已明确
+  - 每个文件都能给出接收/拒收结论
+  - accepted 文件已能映射到 action/location
+- 写后门槛：
+  - 本轮每个文件都有接收判定与理由
+  - 所有 accepted 文件都已有落地映射
+  - 若仍缺关键信息，应继续保持 blocker，而不是误置为 ready
+
 ## `recipe_stage5_replace_strategy_pending_confirmations`
 
 - 适用阶段：`stage_5`
