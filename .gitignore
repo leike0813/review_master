@@ -2,6 +2,9 @@ __pycache__/
 **/__pycache__/
 .codex/
 .history/
+.mypy_cache/
+.pytest_cache/
+.codex/
 .opencode/
 .vscode/
 .opencode
