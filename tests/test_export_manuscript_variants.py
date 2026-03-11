@@ -17,7 +17,15 @@ Old sentence.
     (source_root / "main.tex").write_text(original_text, encoding="utf-8")
 
     artifact_root = tmp_path / "artifact-root"
-    run_python_script(INIT_SCRIPT, "--artifact-root", str(artifact_root))
+    run_python_script(
+        INIT_SCRIPT,
+        "--artifact-root",
+        str(artifact_root),
+        "--document-language",
+        "en",
+        "--working-language",
+        "zh-CN",
+    )
     db_path = artifact_root / "review-master.db"
     marked_root = tmp_path / "marked"
     clean_root = tmp_path / "clean"

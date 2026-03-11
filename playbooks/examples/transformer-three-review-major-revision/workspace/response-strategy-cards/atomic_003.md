@@ -1,66 +1,70 @@
 # Response Strategy Card: atomic_003
 
-这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations` 和 `comment_completion_status`。一张卡只服务一个 `comment_id`。
+这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations`、`comment_completion_status`、`strategy_action_manuscript_drafts`、`comment_response_drafts` 与 `comment_blockers`。一张卡只服务一个 `comment_id`。
 
-## Header
+## 头部信息
 
-| Field | Value |
+| 字段 | 值 |
 | --- | --- |
 | `comment_id` | atomic_003 |
-| Source reviewers | reviewer_1, reviewer_2 |
-| Source threads | reviewer_1_thread_003, reviewer_1_thread_004, reviewer_2_thread_004 |
+| 来源审稿人 | reviewer_1, reviewer_2 |
+| 来源线程 | reviewer_1_thread_003, reviewer_1_thread_004, reviewer_2_thread_004 |
 | `status` | ready |
 | `priority` | high |
 | `evidence_gap` | yes |
-| Target locations | sections/architecture.tex::Model Configuration::paragraph 1, sections/results.tex::Model Variations::paragraph 1 |
+| 目标位置 | sections/architecture.tex::Model Configuration::paragraph 1, sections/results.tex::Model Variations::paragraph 1 |
 
-## Canonical Atomic Item
+## Canonical Atomic 项
 
-- Canonical summary: Justify architecture sensitivity, including heads, dimensions, and model-scale effects.
-- Required action: Add ablation and sensitivity support for the architecture choices.
+- Canonical 摘要: Justify architecture sensitivity, including heads, dimensions, and model-scale effects.
+- 所需动作: Add ablation and sensitivity support for the architecture choices.
 
-## Response Stance
+## 回复立场
 
-- Proposed stance: Accept and support the architecture choices with sensitivity evidence.
-- Why this stance is defensible: Round 2 focuses on atomic_003 because its revision depends on the current supplement tranche.
+- 拟采用立场: Accept and support the architecture choices with sensitivity evidence.
+- 该立场可辩护的理由: Round 2 focuses on atomic_003 because its revision depends on the current supplement tranche.
 
-## Planned Manuscript Actions
+## 策略确认状态
 
-| Action ID | Manuscript Change | Target Locations | Expected Response-Letter Effect |
+- 该策略已被用户显式确认，现在可以在这张卡里继续形成或审阅 Stage 5 drafts。
+
+## 计划中的稿件动作
+
+| 动作 ID | 稿件修改动作 | 目标位置 | 预期回复信效果 |
 | --- | --- | --- | --- |
 | A1 | Add a concise architecture-sensitivity paragraph summarizing head-count, dropout, and scale variations. | sections/architecture.tex::Model Configuration::paragraph 1, sections/results.tex::Model Variations::paragraph 1 | Provide a direct point-to-point response for atomic_003. |
 
-## Manuscript Drafts
+## 稿件草案
 
-| Action ID | Location | Target Location | Draft Text | Rationale |
+| 动作 ID | 位置 | 目标位置 | 草案文本 | 理由 |
 | --- | --- | --- | --- | --- |
 | A1 | L1 | sections/architecture.tex::Model Configuration::paragraph 1 | Single-head attention underperformed the default multi-head setting, removing dropout reduced generalization quality, and scaling the model improved BLEU without eliminating the contribution of the attention design. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
 | A1 | L2 | sections/results.tex::Model Variations::paragraph 1 | Single-head attention underperformed the default multi-head setting, removing dropout reduced generalization quality, and scaling the model improved BLEU without eliminating the contribution of the attention design. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
 
-## Response Draft
+## Response 草案
 
-- Draft text: We added a concise architecture-sensitivity explanation tied to the key configuration choices.
+- 草案文本: We added a concise architecture-sensitivity explanation tied to the key configuration choices.
 
 We now justify the reported head count, depth, and width using the restored variation evidence.
 
 We added the requested sensitivity analysis and used it to separate architecture effects from pure model scale.
-- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+- 理由: Recovered from existing thread-level response content after Stage 5 draft-model migration.
 
-## Required Evidence
+## 所需证据
 
-| Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
+| 证据 ID | 所需材料 | 当前可用（`yes/no`） | 缺口说明 |
 | --- | --- | --- | --- |
 | E1 | round-2 ablation and sensitivity evidence | yes | Need architecture-sensitivity support. |
 
-## Pending Confirmations
+## 待确认事项
 
-- None
+- 无
 
 ## Comment Blockers
 
-- None
+- 无
 
-## Completion Definition
+## 完成定义
 
 - [x] 稿件修改草案已形成
 - [x] 对应 response 草案已形成

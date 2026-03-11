@@ -7,17 +7,10 @@ TBD - created by archiving change define-review-master-state-machine-instruction
 
 The first release SHALL provide a state-machine instruction reference at `review-master/references/workflow-state-machine.md`.
 
-#### Scenario: Stage five allows explicit focus switching
+#### Scenario: Stage five uses generic pending confirmations as a hard gate
 
 - **WHEN** the workflow is at `stage_5`
-- **AND** there is no `workflow_global_blockers` entry
-- **THEN** the state-machine rules must allow `set_active_comment`
-- **AND** they must explain that explicit switching is legal even if the current comment is not yet done
-
-#### Scenario: Global blockers still freeze Stage five
-
-- **WHEN** the workflow is at `stage_5`
-- **AND** `workflow_global_blockers` is non-empty
-- **THEN** the state-machine rules must forbid `set_active_comment`
-- **AND** they must require the Agent to resolve the global blocker first
+- **AND** `workflow_pending_user_confirmations` is non-empty because the active strategy still needs confirmation
+- **THEN** the state-machine rules must require `request_pending_confirmation`
+- **AND** they must forbid `author_comment_drafts` and `advance_active_comment`
 

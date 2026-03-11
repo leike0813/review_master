@@ -24,12 +24,15 @@ At minimum, the workflow MUST include the following checkpoints:
 - **THEN** it must present the revision board to the user and wait for confirmation of the processing order
 
 ### Requirement: Per-comment confirmation is required before execution
+
 Each atomic review comment MUST be confirmed by the user before that comment is allowed to enter manuscript-revision execution.
 
-#### Scenario: Unconfirmed strategy cannot execute
+#### Scenario: unconfirmed strategy cannot author Stage 5 drafts
+
 - **WHEN** the workflow has prepared a response strategy card for one atomic comment
 - **BUT** the user has not confirmed or corrected it yet
-- **THEN** that comment must not enter manuscript modification or response-section generation
+- **THEN** that comment must not enter manuscript-draft authoring or response-draft authoring
+- **AND** the guidance must explicitly tell the user that they may modify the strategy card
 
 ### Requirement: Evidence supplementation is user-provided
 If an atomic comment requires additional experiments, data, references, figures, or arguments that are not present in the current inputs, the workflow MUST request those materials from the user and wait for supplementation before completing that comment.

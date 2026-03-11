@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tests.helpers import GATE_SCRIPT, ROOT, copy_tree, run_python_script
+from tests.helpers import GATE_SCRIPT, ROOT, copy_tree, run_python_script, seed_review_comment_coverage_from_threads
 
 
 def test_sample_workspaces_gate_and_render_regression(tmp_path: Path) -> None:
@@ -16,9 +16,15 @@ def test_sample_workspaces_gate_and_render_regression(tmp_path: Path) -> None:
             ROOT / "playbooks" / "examples" / name / "workspace",
             tmp_path / name,
         )
+        seed_review_comment_coverage_from_threads(copied_workspace / "review-master.db")
         payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
         assert payload["status"] == "ok"
+        assert payload["artifact_presence"]["supplement_suggestion_plan_view"]["status"] == "present"
         assert payload["artifact_presence"]["supplement_intake_plan_view"]["status"] == "present"
+        assert payload["artifact_presence"]["review_comment_coverage_view"]["status"] == "present"
+        assert payload["artifact_presence"]["runtime_localization"]["status"] == "present"
+        assert payload["instruction_payload"]["resume_packet"]["language_context"]["document_language"] == "en"
+        assert payload["instruction_payload"]["resume_packet"]["language_context"]["working_language"] == "zh-CN"
         assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
         assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_export_clean_manuscript"
 
@@ -47,7 +53,7 @@ def test_sample_workspace_checklists_use_stage5_draft_columns() -> None:
         "transformer-three-review-major-revision",
     ]:
         text = (
-            ROOT / "playbooks" / "examples" / name / "workspace" / "final-assembly-checklist.md"
+            ROOT / "playbooks" / "examples" / name / "workspace" / "16-final-assembly-checklist.md"
         ).read_text(encoding="utf-8")
         assert "manuscript_draft_done" in text
         assert "response_draft_done" in text

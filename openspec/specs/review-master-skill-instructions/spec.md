@@ -19,24 +19,27 @@ For each stage, `SKILL.md` MUST describe the purpose, inputs, outputs, and gate 
 - **WHEN** the workflow has completed early analysis
 - **THEN** `SKILL.md` must still require stage 4 completion before any final manuscript rewriting or final response-letter assembly can begin
 
+#### Scenario: Stage instructions cite numbered artifacts
+- **WHEN** `SKILL.md` tells the user which runtime artifacts to inspect during a stage
+- **THEN** it must cite the numbered filenames for all non-strategy-card artifacts
+- **AND** it must keep `response-strategy-cards/{comment_id}.md` as the strategy-card reference form
+
 ### Requirement: Per-comment closed-loop execution in SKILL.md
+
 `review-master/SKILL.md` MUST directly describe the per-comment closed-loop cycle used in stage 5:
 
 1. select one atomic review comment
-2. generate a response strategy, target changes, and required evidence
+2. generate a response strategy, target changes, required evidence, and supplement suggestions
 3. wait for user confirmation or correction
-4. if evidence is missing, emit gap analysis and request materials
-5. after evidence arrives, execute the manuscript change and generate the matching response section
+4. only after confirmation, author Stage 5 manuscript and response drafts
+5. if evidence is missing, emit gap analysis and request materials
 6. mark that comment complete before moving on
 
-#### Scenario: Unconfirmed comment cannot execute
-- **WHEN** a strategy card exists for one atomic comment but the user has not confirmed it
-- **THEN** `SKILL.md` must forbid execution for that comment
+#### Scenario: strategy changes reset execution readiness
 
-#### Scenario: Evidence gap prevents completion
-- **WHEN** one atomic comment lacks required data, experiments, references, figures, or arguments
-- **THEN** `SKILL.md` must require gap analysis and material request
-- **AND** must forbid marking that comment complete
+- **WHEN** a previously confirmed strategy card is materially revised
+- **THEN** `SKILL.md` must require confirmation to be reopened
+- **AND** it must require old drafts to be discarded before new execution can continue
 
 ### Requirement: Final export gates in SKILL.md
 `review-master/SKILL.md` MUST explicitly forbid final export when any of the following conditions remain true:

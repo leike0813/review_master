@@ -36,23 +36,22 @@ At minimum, the workflow MUST produce:
 - **THEN** the workflow has already produced the atomic review comment list, the mapping table, and the priority/dependency revision board
 
 ### Requirement: Per-comment closed-loop cycle
+
 Stage 5 MUST process review comments one atomic item at a time using the following fixed loop:
 
 1. select one atomic comment
-2. generate a response strategy, target manuscript changes, and required evidence for that comment
+2. generate a response strategy, target manuscript changes, required evidence, and supplement suggestions
 3. obtain user confirmation or correction
-4. if evidence is missing, pause that comment and request materials
-5. after materials are provided, execute the manuscript change and generate the corresponding response section
+4. only after confirmation, author Stage 5 manuscript and response drafts
+5. if evidence is missing, pause that comment and request materials
 6. mark the comment complete before advancing to the next comment
 
-#### Scenario: Evidence gap pauses one comment without forcing final export
-- **WHEN** one atomic comment requires new data, experiments, or arguments that are not available in the current inputs
-- **THEN** that comment must pause at the evidence-request step
-- **AND** it must not be marked complete
+#### Scenario: confirmed comment advances to draft authoring
 
-#### Scenario: Confirmed comment advances to execution
-- **WHEN** the user confirms the strategy for one atomic comment and required evidence is available
-- **THEN** the workflow may execute the manuscript change and generate the matching response section for that comment
+- **WHEN** the user confirms the strategy for one atomic comment
+- **AND** required blockers are not preventing execution
+- **THEN** the workflow may author the manuscript draft and matching response draft for that comment
+- **AND** it must not skip directly from strategy card creation to completion
 
 ### Requirement: Final export gate
 The workflow MUST NOT enter final assembly and export unless all export gates are satisfied.

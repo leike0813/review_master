@@ -1,66 +1,70 @@
 # Response Strategy Card: atomic_008
 
-这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations` 和 `comment_completion_status`。一张卡只服务一个 `comment_id`。
+这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations`、`comment_completion_status`、`strategy_action_manuscript_drafts`、`comment_response_drafts` 与 `comment_blockers`。一张卡只服务一个 `comment_id`。
 
-## Header
+## 头部信息
 
-| Field | Value |
+| 字段 | 值 |
 | --- | --- |
 | `comment_id` | atomic_008 |
-| Source reviewers | reviewer_3 |
-| Source threads | reviewer_3_thread_001, reviewer_3_thread_003, reviewer_3_thread_005 |
+| 来源审稿人 | reviewer_3 |
+| 来源线程 | reviewer_3_thread_001, reviewer_3_thread_003, reviewer_3_thread_005 |
 | `status` | ready |
 | `priority` | high |
 | `evidence_gap` | yes |
-| Target locations | sections/discussion.tex::Discussion::paragraph 2, sections/conclusion.tex::Conclusion::paragraph 2 |
+| 目标位置 | sections/discussion.tex::Discussion::paragraph 2, sections/conclusion.tex::Conclusion::paragraph 2 |
 
-## Canonical Atomic Item
+## Canonical Atomic 项
 
-- Canonical summary: Expand limitations, failure buckets, and scope boundaries.
-- Required action: Add a fuller limitations and failure-mode discussion.
+- Canonical 摘要: Expand limitations, failure buckets, and scope boundaries.
+- 所需动作: Add a fuller limitations and failure-mode discussion.
 
-## Response Stance
+## 回复立场
 
-- Proposed stance: Accept and expand limitations, failure buckets, and scope boundaries.
-- Why this stance is defensible: Round 3 focuses on atomic_008 because its revision depends on the current supplement tranche.
+- 拟采用立场: Accept and expand limitations, failure buckets, and scope boundaries.
+- 该立场可辩护的理由: Round 3 focuses on atomic_008 because its revision depends on the current supplement tranche.
 
-## Planned Manuscript Actions
+## 策略确认状态
 
-| Action ID | Manuscript Change | Target Locations | Expected Response-Letter Effect |
+- 该策略已被用户显式确认，现在可以在这张卡里继续形成或审阅 Stage 5 drafts。
+
+## 计划中的稿件动作
+
+| 动作 ID | 稿件修改动作 | 目标位置 | 预期回复信效果 |
 | --- | --- | --- | --- |
 | A1 | Expand the discussion to name failure buckets, scope boundaries, and long-sequence cost caveats. | sections/discussion.tex::Discussion::paragraph 2, sections/conclusion.tex::Conclusion::paragraph 2 | Provide a direct point-to-point response for atomic_008. |
 
-## Manuscript Drafts
+## 稿件草案
 
-| Action ID | Location | Target Location | Draft Text | Rationale |
+| 动作 ID | 位置 | 目标位置 | 草案文本 | 理由 |
 | --- | --- | --- | --- | --- |
 | A1 | L1 | sections/discussion.tex::Discussion::paragraph 2 | Rare words, long subordinate-clause constructions, and some coverage-sensitive cases still account for a meaningful share of residual errors, even though aggregate BLEU improves over prior systems. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
 | A1 | L2 | sections/conclusion.tex::Conclusion::paragraph 2 | Rare words, long subordinate-clause constructions, and some coverage-sensitive cases still account for a meaningful share of residual errors, even though aggregate BLEU improves over prior systems. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
 
-## Response Draft
+## Response 草案
 
-- Draft text: We expanded the limitations section to make the scope boundaries and deployment caveats explicit.
+- 草案文本: We expanded the limitations section to make the scope boundaries and deployment caveats explicit.
 
 We now name representative failure buckets instead of leaving the discussion purely positive.
 
 We tempered the conclusion so it stays within the evidence presented here.
-- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+- 理由: Recovered from existing thread-level response content after Stage 5 draft-model migration.
 
-## Required Evidence
+## 所需证据
 
-| Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
+| 证据 ID | 所需材料 | 当前可用（`yes/no`） | 缺口说明 |
 | --- | --- | --- | --- |
 | E1 | round-3 limitations and failure-bucket materials | yes | Need fuller discussion support. |
 
-## Pending Confirmations
+## 待确认事项
 
-- None
+- 无
 
 ## Comment Blockers
 
-- None
+- 无
 
-## Completion Definition
+## 完成定义
 
 - [x] 稿件修改草案已形成
 - [x] 对应 response 草案已形成

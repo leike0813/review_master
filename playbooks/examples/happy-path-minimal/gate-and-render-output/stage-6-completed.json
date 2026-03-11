@@ -73,6 +73,18 @@
       "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/happy-path-minimal/workspace/response-strategy-cards",
       "status": "present",
       "count": 2
+    },
+    "runtime_localization": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/happy-path-minimal/workspace/runtime-localization",
+      "status": "present"
+    },
+    "working_messages": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/happy-path-minimal/workspace/runtime-localization/working-messages.json",
+      "status": "present"
+    },
+    "document_messages": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/happy-path-minimal/workspace/runtime-localization/document-messages.json",
+      "status": "present"
     }
   },
   "format_errors": [],
@@ -86,7 +98,7 @@
       "has_pending_user_confirmations": false,
       "has_global_blockers": false,
       "has_validation_issues": false,
-      "summary": "当前处于 stage_6，gate=ready，active_comment_id=None，pending_user_confirmations=0，global_blockers=0，validation_issues=no。"
+      "summary": "当前处于 stage_6，gate=ready，active_comment_id=None。"
     },
     "resume_packet": {
       "resume_status": "completed",
@@ -94,7 +106,7 @@
       "current_stage": "stage_6",
       "stage_gate": "ready",
       "active_comment_id": null,
-      "current_state_summary": "当前处于 stage_6，gate=ready，active_comment_id=None，pending_user_confirmations=0，global_blockers=0，validation_issues=no。",
+      "current_state_summary": "当前处于 stage_6，gate=ready，active_comment_id=None。",
       "current_focus": "All Stage 6 outputs are already generated; only integrity and reproducibility checks remain.",
       "current_objective": "Keep the final happy-path sample aligned with the fully exported Stage 6 contract.",
       "why_paused": "This sample workspace is intentionally parked at the fully exported final state for replay and inspection.",
@@ -117,13 +129,23 @@
         "当前阶段主视图",
         "当前阶段参考文档"
       ],
-      "next_action_anchor": "stage_6_completed"
+      "next_action_anchor": "stage_6_completed",
+      "language_context": {
+        "document_language": "en",
+        "working_language": "zh-CN",
+        "manuscript_detected_language": "en",
+        "review_comments_detected_language": "en",
+        "prompt_detected_language": "zh-CN",
+        "document_language_source": "manuscript",
+        "working_language_source": "prompt",
+        "languages_confirmed": "yes"
+      }
     },
     "allowed_next_actions": [
       {
         "action_id": "stage_6_completed",
-        "instruction": "Stage 6 已闭环。保持导出产物不变，如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
-        "reason": "所有 Stage 6 产物都已导出。",
+        "instruction": "Stage 6 已闭环。保持导出产物不变；如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
+        "reason": "所有 Stage 6 产物均已导出。",
         "target_artifacts": [
           "review-master.db",
           "export-patch-plan.md",
@@ -136,8 +158,8 @@
     ],
     "recommended_next_action": {
       "action_id": "stage_6_completed",
-      "instruction": "Stage 6 已闭环。保持导出产物不变，如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
-      "reason": "所有 Stage 6 产物都已导出。",
+      "instruction": "Stage 6 已闭环。保持导出产物不变；如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
+      "reason": "所有 Stage 6 产物均已导出。",
       "target_artifacts": [
         "review-master.db",
         "export-patch-plan.md",

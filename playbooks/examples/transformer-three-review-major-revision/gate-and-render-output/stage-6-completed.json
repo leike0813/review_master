@@ -73,6 +73,18 @@
       "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/transformer-three-review-major-revision/workspace/response-strategy-cards",
       "status": "present",
       "count": 9
+    },
+    "runtime_localization": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/transformer-three-review-major-revision/workspace/runtime-localization",
+      "status": "present"
+    },
+    "working_messages": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/transformer-three-review-major-revision/workspace/runtime-localization/working-messages.json",
+      "status": "present"
+    },
+    "document_messages": {
+      "path": "/home/joshua/Workspace/Code/Skill/review_master/playbooks/examples/transformer-three-review-major-revision/workspace/runtime-localization/document-messages.json",
+      "status": "present"
     }
   },
   "format_errors": [],
@@ -86,7 +98,7 @@
       "has_pending_user_confirmations": false,
       "has_global_blockers": false,
       "has_validation_issues": false,
-      "summary": "当前处于 stage_6，gate=ready，active_comment_id=None，pending_user_confirmations=0，global_blockers=0，validation_issues=no。"
+      "summary": "当前处于 stage_6，gate=ready，active_comment_id=None。"
     },
     "resume_packet": {
       "resume_status": "completed",
@@ -94,7 +106,7 @@
       "current_stage": "stage_6",
       "stage_gate": "ready",
       "active_comment_id": null,
-      "current_state_summary": "当前处于 stage_6，gate=ready，active_comment_id=None，pending_user_confirmations=0，global_blockers=0，validation_issues=no。",
+      "current_state_summary": "当前处于 stage_6，gate=ready，active_comment_id=None。",
       "current_focus": "All outputs are exported; the workspace is preserved as a replayable final-state example.",
       "current_objective": "Keep the transformer three-review replay aligned with the fully exported Stage 6 contract.",
       "why_paused": "The runtime replay has reached its terminal exported state and is paused only for inspection or regression checks.",
@@ -115,13 +127,23 @@
         "当前阶段主视图",
         "当前阶段参考文档"
       ],
-      "next_action_anchor": "stage_6_completed"
+      "next_action_anchor": "stage_6_completed",
+      "language_context": {
+        "document_language": "en",
+        "working_language": "zh-CN",
+        "manuscript_detected_language": "en",
+        "review_comments_detected_language": "en",
+        "prompt_detected_language": "zh-CN",
+        "document_language_source": "manuscript",
+        "working_language_source": "prompt",
+        "languages_confirmed": "yes"
+      }
     },
     "allowed_next_actions": [
       {
         "action_id": "stage_6_completed",
-        "instruction": "Stage 6 已闭环。保持导出产物不变，如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
-        "reason": "所有 Stage 6 产物都已导出。",
+        "instruction": "Stage 6 已闭环。保持导出产物不变；如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
+        "reason": "所有 Stage 6 产物均已导出。",
         "target_artifacts": [
           "review-master.db",
           "export-patch-plan.md",
@@ -134,8 +156,8 @@
     ],
     "recommended_next_action": {
       "action_id": "stage_6_completed",
-      "instruction": "Stage 6 已闭环。保持导出产物不变，如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
-      "reason": "所有 Stage 6 产物都已导出。",
+      "instruction": "Stage 6 已闭环。保持导出产物不变；如需新增修改，应回到数据库真源更新后再重新运行 gate-and-render 核心脚本。",
+      "reason": "所有 Stage 6 产物均已导出。",
       "target_artifacts": [
         "review-master.db",
         "export-patch-plan.md",

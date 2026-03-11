@@ -59,7 +59,7 @@ def test_failure_recovery_example_structure() -> None:
         "user-supplements/round-2-good/stability-results.csv",
         "user-supplements/round-2-good/supplement-note.md",
         "workspace/review-master.db",
-        "workspace/supplement-intake-plan.md",
+        "workspace/15-supplement-intake-plan.md",
         "workspace/response-strategy-cards/atomic_004.md",
         "outputs/response-letter.tex",
     ]
@@ -96,7 +96,7 @@ def test_failure_recovery_snapshot_contract() -> None:
 def test_failure_recovery_assets_explain_mismatch_and_final_workspace_replays(tmp_path: Path) -> None:
     bad_resume = _read("gate-and-render-output/stage-5-after-bad-supplement-agent-resume.md")
     bad_strategy_card = _read("gate-and-render-output/stage-5-after-bad-supplement-atomic_004-strategy-card.md")
-    final_resume = _read("workspace/agent-resume.md")
+    final_resume = _read("workspace/01-agent-resume.md")
     final_strategy_card = _read("workspace/response-strategy-cards/atomic_004.md")
     response_latex = _read("outputs/response-letter.tex")
 

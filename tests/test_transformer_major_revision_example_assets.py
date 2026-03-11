@@ -54,9 +54,9 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
         "inputs/review-comments.md",
         "inputs/manuscript/main.tex",
         "workspace/review-master.db",
-        "workspace/supplement-intake-plan.md",
-        "workspace/thread-to-atomic-mapping.md",
-        "workspace/final-assembly-checklist.md",
+        "workspace/15-supplement-intake-plan.md",
+        "workspace/05-thread-to-atomic-mapping.md",
+        "workspace/16-final-assembly-checklist.md",
         "outputs/response-letter.md",
         "outputs/response-letter.tex",
         "outputs/marked-manuscript/main.tex",
@@ -69,7 +69,7 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
 def test_transformer_major_revision_review_comments_traceability_and_mapping_align() -> None:
     review_comments = _read("inputs/review-comments.md")
     traceability = _read("reference/degradation-traceability.md")
-    mapping = _read("workspace/thread-to-atomic-mapping.md")
+    mapping = _read("workspace/05-thread-to-atomic-mapping.md")
 
     reviewer_sections = re.findall(r"^# Reviewer \d+$", review_comments, flags=re.MULTILINE)
     numbered_comments = re.findall(r"^\d+\. ", review_comments, flags=re.MULTILINE)
@@ -94,15 +94,15 @@ def test_transformer_major_revision_review_comments_traceability_and_mapping_ali
 
 def test_transformer_major_revision_runtime_outputs_are_complete() -> None:
     actual_snapshots = {path.name for path in (EXAMPLE_ROOT / "gate-and-render-output").iterdir() if path.is_file()}
-    final_checklist = _read("workspace/final-assembly-checklist.md")
+    final_checklist = _read("workspace/16-final-assembly-checklist.md")
     strategy_card = _read("workspace/response-strategy-cards/atomic_001.md")
     response_latex = _read("outputs/response-letter.tex")
 
     assert actual_snapshots == REQUIRED_SNAPSHOTS
     assert "manuscript_draft_done" in final_checklist
     assert "response_draft_done" in final_checklist
-    assert "## Manuscript Drafts" in strategy_card
-    assert "## Response Draft" in strategy_card
+    assert "## 稿件草案" in strategy_card
+    assert "## Response 草案" in strategy_card
     assert "## Comment Blockers" in strategy_card
     assert "| clean_manuscript | exported |" in final_checklist
     assert "| marked_manuscript | exported |" in final_checklist

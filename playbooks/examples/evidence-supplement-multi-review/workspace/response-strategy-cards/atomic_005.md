@@ -1,61 +1,65 @@
 # Response Strategy Card: atomic_005
 
-这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations` 和 `comment_completion_status`。一张卡只服务一个 `comment_id`。
+这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations`、`comment_completion_status`、`strategy_action_manuscript_drafts`、`comment_response_drafts` 与 `comment_blockers`。一张卡只服务一个 `comment_id`。
 
-## Header
+## 头部信息
 
-| Field | Value |
+| 字段 | 值 |
 | --- | --- |
 | `comment_id` | atomic_005 |
-| Source reviewers | reviewer_2 |
-| Source threads | reviewer_2_thread_002 |
+| 来源审稿人 | reviewer_2 |
+| 来源线程 | reviewer_2_thread_002 |
 | `status` | ready |
 | `priority` | medium |
 | `evidence_gap` | no |
-| Target locations | sections/discussion.tex::Limitations::paragraph 1 |
+| 目标位置 | sections/discussion.tex::Limitations::paragraph 1 |
 
-## Canonical Atomic Item
+## Canonical Atomic 项
 
-- Canonical summary: Expand limitations and discussion.
-- Required action: Strengthen the limitations section.
+- Canonical 摘要: Expand limitations and discussion.
+- 所需动作: Strengthen the limitations section.
 
-## Response Stance
+## 回复立场
 
-- Proposed stance: accept_and_expand
-- Why this stance is defensible: The limitations section is now explicitly expanded.
+- 拟采用立场: accept_and_expand
+- 该立场可辩护的理由: The limitations section is now explicitly expanded.
 
-## Planned Manuscript Actions
+## 策略确认状态
 
-| Action ID | Manuscript Change | Target Locations | Expected Response-Letter Effect |
+- 该策略已被用户显式确认，现在可以在这张卡里继续形成或审阅 Stage 5 drafts。
+
+## 计划中的稿件动作
+
+| 动作 ID | 稿件修改动作 | 目标位置 | 预期回复信效果 |
 | --- | --- | --- | --- |
 | A1 | Expand the limitations and discussion section. | sections/discussion.tex::Limitations::paragraph 1 | Responds to the request for a stronger discussion of limitations. |
 
-## Manuscript Drafts
+## 稿件草案
 
-| Action ID | Location | Target Location | Draft Text | Rationale |
+| 动作 ID | 位置 | 目标位置 | 草案文本 | 理由 |
 | --- | --- | --- | --- | --- |
 | A1 | L1 | sections/discussion.tex::Limitations::paragraph 1 | Our evaluation is limited to the current sensing setup and still requires deployment-time calibration under distribution shift. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
 
-## Response Draft
+## Response 草案
 
-- Draft text: We addressed this thread in two coordinated parts. First, we strengthened the baseline-comparison explanation with a mechanism-based account shared with Reviewer 1. Second, we expanded the Discussion section to state the main limitations, deployment constraints, and calibration caveats explicitly.
-- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+- 草案文本: We addressed this thread in two coordinated parts. First, we strengthened the baseline-comparison explanation with a mechanism-based account shared with Reviewer 1. Second, we expanded the Discussion section to state the main limitations, deployment constraints, and calibration caveats explicitly.
+- 理由: Recovered from existing thread-level response content after Stage 5 draft-model migration.
 
-## Required Evidence
+## 所需证据
 
-| Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
+| 证据 ID | 所需材料 | 当前可用（`yes/no`） | 缺口说明 |
 | --- | --- | --- | --- |
 |  |  |  |  |
 
-## Pending Confirmations
+## 待确认事项
 
-- None
+- 无
 
 ## Comment Blockers
 
-- None
+- 无
 
-## Completion Definition
+## 完成定义
 
 - [x] 稿件修改草案已形成
 - [x] 对应 response 草案已形成

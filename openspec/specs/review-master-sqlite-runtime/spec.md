@@ -7,20 +7,17 @@ TBD - created by archiving change switch-review-master-to-sqlite-ssot-rendering.
 
 The runtime workspace MUST use SQLite as the only writable source of truth.
 
-#### Scenario: Stage 5 draft tables exist in runtime schema
+#### Scenario: Stage 5 supplement suggestion truth exists in runtime schema
 
 - **WHEN** the runtime database schema is initialized
-- **THEN** it MUST include `strategy_action_manuscript_drafts`
-- **AND** it MUST include `comment_response_drafts`
-- **AND** it MUST include `comment_blockers`
-- **AND** these tables MUST be part of the required runtime contract
+- **THEN** it MUST include `supplement_suggestion_items`
+- **AND** it MUST include `supplement_suggestion_intake_links`
 
-#### Scenario: Completion status uses draft semantics
+#### Scenario: supplement suggestions remain relational
 
-- **WHEN** the runtime database schema is initialized
-- **THEN** `comment_completion_status` MUST expose `manuscript_draft_done`
-- **AND** it MUST expose `response_draft_done`
-- **AND** it MUST NOT depend on `manuscript_change_done` or `response_section_done` as the active schema contract
+- **WHEN** one supplement suggestion is linked to multiple uploaded files
+- **THEN** the runtime schema MUST represent those links in a relation table
+- **AND** it MUST NOT serialize the file list into one text column
 
 ### Requirement: stage-four view consolidation
 
