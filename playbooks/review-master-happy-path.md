@@ -351,6 +351,8 @@ Agent 写入：
 - `workflow_state.active_comment_id`
 - `strategy_cards`
 - `strategy_card_actions`
+- `strategy_action_manuscript_drafts`
+- `comment_response_drafts`
 - `comment_completion_status`
 - `supplement_intake_items`（本样例保持空）
 - `supplement_landing_links`（本样例保持空）
@@ -358,12 +360,16 @@ Agent 写入：
   - `recipe_stage5_set_active_comment`
   - `recipe_stage5_upsert_strategy_card`
   - `recipe_stage5_replace_strategy_actions`
+  - `recipe_stage5_replace_manuscript_drafts`
+  - `recipe_stage5_upsert_response_draft`
   - `recipe_stage5_replace_supplement_intake_and_landing`
   - `recipe_stage5_upsert_completion_status`
 - 更新表：
-  - `workflow_state`
+- `workflow_state`
 - `strategy_cards`
 - `strategy_card_actions`
+- `strategy_action_manuscript_drafts`
+- `comment_response_drafts`
 - `comment_completion_status`
 - `supplement_intake_items`
 - `supplement_landing_links`

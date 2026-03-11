@@ -7,19 +7,20 @@ TBD - created by archiving change switch-review-master-to-sqlite-ssot-rendering.
 
 The runtime workspace MUST use SQLite as the only writable source of truth.
 
-#### Scenario: initialize a runtime workspace
-
-- **WHEN** the agent initializes a new runtime workspace
-- **THEN** the workspace MUST contain `review-master.db`
-- **AND** the runtime Markdown artifacts MUST be treated as read-only rendered views
-- **AND** `workflow-state.yaml` MUST NOT be part of the runtime contract
-
-#### Scenario: supplement intake tables exist in runtime schema
+#### Scenario: Stage 5 draft tables exist in runtime schema
 
 - **WHEN** the runtime database schema is initialized
-- **THEN** it MUST include `supplement_intake_items`
-- **AND** it MUST include `supplement_landing_links`
-- **AND** both tables MUST be part of the required runtime table contract
+- **THEN** it MUST include `strategy_action_manuscript_drafts`
+- **AND** it MUST include `comment_response_drafts`
+- **AND** it MUST include `comment_blockers`
+- **AND** these tables MUST be part of the required runtime contract
+
+#### Scenario: Completion status uses draft semantics
+
+- **WHEN** the runtime database schema is initialized
+- **THEN** `comment_completion_status` MUST expose `manuscript_draft_done`
+- **AND** it MUST expose `response_draft_done`
+- **AND** it MUST NOT depend on `manuscript_change_done` or `response_section_done` as the active schema contract
 
 ### Requirement: stage-four view consolidation
 

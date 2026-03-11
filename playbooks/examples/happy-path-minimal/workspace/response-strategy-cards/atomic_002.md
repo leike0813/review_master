@@ -30,6 +30,17 @@
 | --- | --- | --- | --- |
 | A1 | Add an explicit signpost sentence that points to the relevant result paragraph. | main.tex::Results::paragraph 3 | Lets the response cite the exact supporting evidence paragraph. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | main.tex::Results::paragraph 3 | The supporting evidence for this mechanism-based explanation is provided in the paragraph immediately below Table 2. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We addressed this combined thread in a single point-to-point row. The revised Results paragraph now explains the mechanism behind the gain and explicitly points readers to the paragraph immediately below Table 2 as the supporting evidence location.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +51,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

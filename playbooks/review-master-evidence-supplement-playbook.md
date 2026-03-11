@@ -312,7 +312,7 @@ Agent 写入：
 此时“ready”的含义不是“跳过确认直接执行”，而是：
 
 - 当前策略卡已经成熟到足以面向用户确认
-- 用户确认后，Agent 才进入稿件修改草案和 response 段落草案
+- 用户确认后，Agent 才进入 manuscript draft 和 response draft
 - 完成标记只能发生在草案与一一对应关系都落地之后
 
 ### Stage 5B
@@ -412,7 +412,7 @@ Agent 读取补材后，更新数据库并关闭 blocker。补材到位后，仍
 - blocker 已解除
 - 当前 item 可以重新进入逐条确认
 - 当前轮每个补材文件都必须有 `accepted/rejected` 与理由，且 accepted 文件必须已有 landing 映射
-- 只有确认完成并形成稿件修改草案、response 段落草案以及一一对应关系后，才可把 `atomic_004` 标记为完成
+- 只有确认完成并形成 manuscript draft、response draft 以及一一对应关系后，才可把 `atomic_004` 标记为完成
 
 ### Stage 6
 

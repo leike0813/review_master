@@ -95,9 +95,15 @@ def test_transformer_major_revision_review_comments_traceability_and_mapping_ali
 def test_transformer_major_revision_runtime_outputs_are_complete() -> None:
     actual_snapshots = {path.name for path in (EXAMPLE_ROOT / "gate-and-render-output").iterdir() if path.is_file()}
     final_checklist = _read("workspace/final-assembly-checklist.md")
+    strategy_card = _read("workspace/response-strategy-cards/atomic_001.md")
     response_latex = _read("outputs/response-letter.tex")
 
     assert actual_snapshots == REQUIRED_SNAPSHOTS
+    assert "manuscript_draft_done" in final_checklist
+    assert "response_draft_done" in final_checklist
+    assert "## Manuscript Drafts" in strategy_card
+    assert "## Response Draft" in strategy_card
+    assert "## Comment Blockers" in strategy_card
     assert "| clean_manuscript | exported |" in final_checklist
     assert "| marked_manuscript | exported |" in final_checklist
     assert "| response_markdown | exported |" in final_checklist

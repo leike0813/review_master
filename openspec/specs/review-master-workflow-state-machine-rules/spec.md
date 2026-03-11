@@ -4,23 +4,20 @@
 TBD - created by archiving change define-review-master-state-machine-instruction-loop. Update Purpose after archive.
 ## Requirements
 ### Requirement: The first release must define workflow state-machine rules
+
 The first release SHALL provide a state-machine instruction reference at `review-master/references/workflow-state-machine.md`.
 
-This document MUST define:
+#### Scenario: Stage five allows explicit focus switching
 
-- allowed actions for each `current_stage` and `stage_gate` combination
-- blocked actions for each stage
-- entry and exit conditions for each stage
-- how `pending_user_confirmations`, `global_blockers`, and `active_comment_id` affect what the agent may do next
+- **WHEN** the workflow is at `stage_5`
+- **AND** there is no `workflow_global_blockers` entry
+- **THEN** the state-machine rules must allow `set_active_comment`
+- **AND** they must explain that explicit switching is legal even if the current comment is not yet done
 
-#### Scenario: Stage four waits for confirmation
-- **WHEN** the workflow is at `stage_4`
-- **AND** user confirmations are still pending
-- **THEN** the state-machine rules forbid entering phase-five execution
-- **AND** require the agent to request user confirmation
+#### Scenario: Global blockers still freeze Stage five
 
-#### Scenario: Evidence gap blocks completion
-- **WHEN** an active comment still has an evidence gap
-- **THEN** the state-machine rules forbid marking that comment complete
-- **AND** require the agent to request materials or clarification
+- **WHEN** the workflow is at `stage_5`
+- **AND** `workflow_global_blockers` is non-empty
+- **THEN** the state-machine rules must forbid `set_active_comment`
+- **AND** they must require the Agent to resolve the global blocker first
 

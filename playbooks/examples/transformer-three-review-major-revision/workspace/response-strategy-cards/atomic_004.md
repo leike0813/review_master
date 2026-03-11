@@ -30,6 +30,17 @@
 | --- | --- | --- | --- |
 | A1 | Revise the main-results discussion to explain why short attention paths plausibly improve the baseline comparison. | sections/results.tex::Machine Translation::paragraph 2 | Provide a direct point-to-point response for atomic_004. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | sections/results.tex::Machine Translation::paragraph 2 | The attention-only encoder-decoder appears to benefit from short cross-token path lengths, which helps preserve long-range dependencies without recurrent state propagation. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We strengthened the main-results discussion with a mechanism-based explanation of the baseline gain.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +51,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

@@ -30,6 +30,17 @@
 | --- | --- | --- | --- |
 | A1 | Clarify data splits and seeds in the method section. | sections/method.tex::Implementation Details::paragraph 3 | Lets the response point to explicit reproducibility details. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | sections/method.tex::Implementation Details::paragraph 3 | We use a fixed train/validation/test split of 640/160/200 plots and repeat all stochastic experiments with seeds 11, 17, 23, 29, and 37. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We expanded the implementation-details paragraph so the split counts and multi-seed setup are explicit and reproducible.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +51,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

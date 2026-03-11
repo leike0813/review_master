@@ -5,45 +5,27 @@ TBD - created by archiving change refine-review-master-stage-5-strategy-and-exec
 ## Requirements
 ### Requirement: Stage 5 must define confirmation, blocker, and completion gates
 
-Stage 5 MUST explicitly define:
+Stage 5 MUST explicitly define confirmation, blocker, and completion using the new draft-truth model.
 
-- when confirmation is required
-- when a blocker must be written
-- when a comment may be marked complete
-- when supplement intake and landing are considered complete enough to clear blocker
+#### Scenario: Completion requires formal draft truth rows
 
-#### Scenario: Evidence gap creates a blocker
-
-- **Given** an active item needs supporting material that is not yet available
-- **When** the Agent judges `evidence_gap = yes`
-- **Then** the docs must require a blocker to be written
-- **And** the docs must forbid marking the item complete until the blocker is cleared
-
-#### Scenario: Supplement intake is incomplete
-
-- **Given** user supplements were provided for the active round
-- **When** at least one supplement file has no intake decision or no rationale
-- **Then** Stage 5 MUST remain blocked
-- **And** the docs must require completing file-level intake decisions before resuming
-
-#### Scenario: Accepted supplement has no landing mapping
-
-- **Given** a supplement file is marked `accepted`
-- **When** that file has no mapping to any `comment_id/action_order/location_order`
-- **Then** Stage 5 MUST remain blocked
-- **And** the docs must require completing landing mappings before clearing blocker
-
-#### Scenario: Completion requires landed drafts
-
-- **Given** the Agent has a strategy and evidence judgment for an active item
-- **When** manuscript-change and response-paragraph drafts are still missing
+- **Given** an active item has a confirmed strategy and closed evidence gap
+- **When** `strategy_action_manuscript_drafts` or `comment_response_drafts` are still missing
 - **Then** the docs must forbid marking the item complete
-- **And** the completion bar must require both draft artifacts and one-to-one linkage
+- **And** the completion bar must require formal draft rows rather than implied or off-record drafts
 
-#### Scenario: Silent switching is forbidden
+#### Scenario: Comment-scoped blocker does not freeze the whole stage
 
-- **Given** `workflow_state.active_comment_id` is already set
-- **When** the Agent wants to move to another item
-- **Then** the docs must explain when switching is allowed
-- **And** the docs must forbid silent switching without closure, blocker, or explicit user instruction
+- **Given** the current `active_comment_id` has a blocker written in `comment_blockers`
+- **When** no `workflow_global_blockers` exist
+- **Then** the docs must keep that comment blocked from completion
+- **And** they must still allow an explicit switch to another non-done comment
+
+#### Scenario: Legacy completion flags are not trusted after migration
+
+- **Given** a legacy Stage 5 workspace is migrated to the new draft model
+- **When** the migration finishes
+- **Then** the docs must require `manuscript_draft_done = no` for every comment
+- **And** they must require `response_draft_done = no` for every comment
+- **And** they must explain that the Agent has to rebuild formal draft truth before completion can resume
 

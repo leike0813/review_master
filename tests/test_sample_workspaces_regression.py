@@ -37,3 +37,19 @@ def test_sample_response_latex_outputs_have_front_matter() -> None:
         assert "\\end{document}" in text
         assert "\\subsection*{ reviewer_" not in text
         assert "\\subsection*{ reviewer\\_" in text
+
+
+def test_sample_workspace_checklists_use_stage5_draft_columns() -> None:
+    for name in [
+        "happy-path-minimal",
+        "evidence-supplement-multi-review",
+        "evidence-supplement-failure-recovery",
+        "transformer-three-review-major-revision",
+    ]:
+        text = (
+            ROOT / "playbooks" / "examples" / name / "workspace" / "final-assembly-checklist.md"
+        ).read_text(encoding="utf-8")
+        assert "manuscript_draft_done" in text
+        assert "response_draft_done" in text
+        assert "manuscript_change_done" not in text
+        assert "response_section_done" not in text

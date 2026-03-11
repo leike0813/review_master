@@ -15,23 +15,17 @@ This document MUST serve as the single source of truth for how the six Markdown 
 - **THEN** the template points to `artifact-authoring-rules.md` for detailed filling rules
 
 ### Requirement: Minimal required fields per artifact
+
 The authoring rules MUST define the minimal required fields for each artifact and MUST allow non-critical fields to remain blank.
 
 At minimum:
 
-- `manuscript-structure-summary.md`: `main_entry`, `project_shape`, at least one section row, at least one claim row
-- `atomic-review-comment-list.md`: `comment_id`, `reviewer_id`, `status`, `Original Comment Excerpt`, `Required Action`
-- `comment-manuscript-mapping-table.md`: `comment_id`, `target_location`, `Manuscript Claim or Section`
-- `revision-board.md`: `comment_id`, `status`, `priority`, `evidence_gap`, `next_action`
-- `response-strategy-card.md`: card header fields, `Original comment excerpt`, `Proposed stance`, at least one action row, completion checklist
-- `final-assembly-checklist.md`: `comment_id`, `status`, `manuscript_change_done`, `response_section_done`, `export_ready`
+- `final-assembly-checklist.md`: `comment_id`, `status`, `manuscript_draft_done`, `response_draft_done`, `export_ready`
+- `response-strategy-card.md`: card header fields, `Original comment excerpt`, `Proposed stance`, at least one action row, completion checklist, manuscript draft section, response draft section
 
-#### Scenario: Partially filled but valid artifact
-- **WHEN** an artifact has all of its minimal required fields filled
-- **AND** some non-critical fields remain blank
-- **THEN** the artifact is still considered valid for the first release
+#### Scenario: Stage 5 artifact labels use draft terminology
 
-#### Scenario: Missing required fields makes artifact incomplete
-- **WHEN** a template instance is missing one or more required fields from its minimal required set
-- **THEN** that artifact is considered incomplete
+- **WHEN** the authoring rules describe `final-assembly-checklist.md` or `response-strategy-card.md`
+- **THEN** they must use `manuscript_draft_done` and `response_draft_done`
+- **AND** they must not describe Stage 5 as if final manuscript authoring were already complete
 

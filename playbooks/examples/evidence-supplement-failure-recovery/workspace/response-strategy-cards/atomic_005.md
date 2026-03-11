@@ -30,6 +30,17 @@
 | --- | --- | --- | --- |
 | A1 | Expand the limitations and discussion section. | sections/discussion.tex::Limitations::paragraph 1 | Responds to the request for a stronger discussion of limitations. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | sections/discussion.tex::Limitations::paragraph 1 | Our evaluation is limited to the current sensing setup and still requires deployment-time calibration under distribution shift. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We addressed this thread in two coordinated parts. First, we strengthened the baseline-comparison explanation with a mechanism-based account shared with Reviewer 1. Second, we expanded the Discussion section to state the main limitations, deployment constraints, and calibration caveats explicitly.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +51,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

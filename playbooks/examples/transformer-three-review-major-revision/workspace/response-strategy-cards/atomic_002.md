@@ -30,6 +30,17 @@
 | --- | --- | --- | --- |
 | A1 | Rewrite the background positioning paragraph to distinguish the paper from ByteNet, ConvS2S, and memory-style attention. | sections/background.tex::Background::paragraph 3 | Provide a direct point-to-point response for atomic_002. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | sections/background.tex::Background::paragraph 3 | The specific claim here is that a strong encoder-decoder translation system can be built from self-attention and feed-forward blocks alone, without sequence-aligned recurrence or convolution in the main transduction backbone. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We clarified the novelty boundary against prior efficient sequence models and narrowed the claim accordingly.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +51,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

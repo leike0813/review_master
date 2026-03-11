@@ -30,6 +30,20 @@
 | --- | --- | --- | --- |
 | A1 | Revise the introduction and main-results explanation to state why short attention paths help long-range dependency modeling. | sections/introduction.tex::Introduction::paragraph 3, sections/results.tex::Machine Translation::paragraph 2 | Provide a direct point-to-point response for atomic_001. |
 
+## Manuscript Drafts
+
+| Action ID | Location | Target Location | Draft Text | Rationale |
+| --- | --- | --- | --- | --- |
+| A1 | L1 | sections/introduction.tex::Introduction::paragraph 3 | Self-attention gives every token a short path to every other token, so long-range dependencies can be modeled without recurrent state propagation or deep convolutional stacks. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+| A1 | L2 | sections/results.tex::Machine Translation::paragraph 2 | Self-attention gives every token a short path to every other token, so long-range dependencies can be modeled without recurrent state propagation or deep convolutional stacks. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+
+## Response Draft
+
+- Draft text: We revised the introduction to explain why attention-only modeling helps beyond improved parallelism.
+
+We paired the high-level intuition with a concrete long-range dependency example.
+- Rationale: Recovered from existing thread-level response content after Stage 5 draft-model migration.
+
 ## Required Evidence
 
 | Evidence ID | Required Material | Available Now (`yes/no`) | Gap Note |
@@ -40,9 +54,13 @@
 
 - None
 
+## Comment Blockers
+
+- None
+
 ## Completion Definition
 
-- [x] 稿件修改已执行
-- [x] 对应 response 段落已生成
+- [x] 稿件修改草案已形成
+- [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

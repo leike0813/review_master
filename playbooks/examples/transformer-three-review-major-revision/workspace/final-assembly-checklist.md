@@ -4,7 +4,7 @@
 
 ## Atomic Completion Table
 
-| `comment_id` | Source Reviewers | Source Threads | `status` | `priority` | `evidence_gap` | Target Locations | `manuscript_change_done` | `response_section_done` | `one_to_one_link_checked` | `export_ready` |
+| `comment_id` | Source Reviewers | Source Threads | `status` | `priority` | `evidence_gap` | Target Locations | `manuscript_draft_done` | `response_draft_done` | `one_to_one_link_checked` | `export_ready` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | atomic_001 | reviewer_1, reviewer_3 | reviewer_1_thread_001, reviewer_3_thread_004 | ready | high | yes | sections/introduction.tex::Introduction::paragraph 3, sections/results.tex::Machine Translation::paragraph 2 | yes | yes | yes | yes |
 | atomic_002 | reviewer_1 | reviewer_1_thread_002 | ready | medium | yes | sections/background.tex::Background::paragraph 3 | yes | yes | yes | yes |

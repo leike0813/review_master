@@ -7,10 +7,10 @@ TBD - created by archiving change normalize-review-master-workflow-cross-cutting
 
 `review-master` MUST define one glossary document that fixes the formal names for stages, scripts, runtime truth objects, rendered views, final exports, and action ids.
 
-#### Scenario: glossary locks the official names
+#### Scenario: glossary includes migration script and Stage 5 draft terminology
 
-- **Given** the skill already spans multiple docs, playbooks, and fixtures
-- **When** a reader needs to know the official term for a stage, script, output, or action
-- **Then** `review-master/references/workflow-glossary.md` must provide that official term
-- **And** other docs must align with it rather than inventing aliases
+- **Given** the Stage 5 draft-model migration has been implemented
+- **When** a reader checks the glossary
+- **Then** it must list the official migration script name
+- **And** it must use `manuscript_draft_done` and `response_draft_done` as the official completion-field names
 

@@ -21,19 +21,22 @@ At minimum, `SKILL.md` MUST define the role of:
 - **THEN** `SKILL.md` treats it as a Markdown-first artifact intended for user reading, review, and confirmation
 
 ### Requirement: Artifact generation timing and purpose
+
 `review-master/SKILL.md` MUST describe when each Markdown artifact is generated and how it is used in the workflow.
 
-#### Scenario: Revision board is generated before execution
-- **WHEN** the workflow completes mapping and prioritization
-- **THEN** `SKILL.md` requires generation of the revision board before stage 5 execution begins
+#### Scenario: Strategy card shows Stage 5 draft truth
 
-#### Scenario: Strategy card is generated before per-comment confirmation
-- **WHEN** one atomic review comment enters stage 5
-- **THEN** `SKILL.md` requires generation of a per-comment strategy card before asking the user to confirm that comment
+- **WHEN** one atomic review comment enters Stage 5
+- **THEN** the per-comment strategy card must show manuscript drafts
+- **AND** it must show the response draft
+- **AND** it must show any comment-scoped blockers for that item
 
-#### Scenario: Supplement intake plan is generated before blocker is cleared
-- **WHEN** stage 5 receives a supplement round for a blocked item
-- **THEN** `SKILL.md` requires generation (or refresh) of supplement intake and landing plan before resuming execution
+#### Scenario: Final assembly checklist uses draft completion names
+
+- **WHEN** `final-assembly-checklist.md` is rendered
+- **THEN** it must use `manuscript_draft_done`
+- **AND** it must use `response_draft_done`
+- **AND** it must not present Stage 5 as if final manuscript authoring were already complete
 
 ### Requirement: No template files required in this change
 This change MUST define the Markdown artifacts in `SKILL.md` without requiring dedicated template files under `review-master/references/`.
