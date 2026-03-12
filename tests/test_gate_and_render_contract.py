@@ -158,6 +158,9 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
                 "source_path": "tests://review-comments.md",
                 "original_text": (
                     "Please clarify the novelty claim and cite recent work.\n\n"
+                    "The manuscript currently only provides a heading-level statement, while the detailed rationale, "
+                    "expected scope, and concrete evaluation requests remain in this paragraph and should be tracked "
+                    "as supporting coverage instead of staying invisible in the review trace.\n\n"
                     "Add an ablation study for the decoder.\n"
                     "Discuss the failure case.\n"
                     "This final sentence is still uncovered.\n\n"
@@ -167,18 +170,26 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
                         "coverage_status": "covered",
                         "segment_text": "Please clarify the novelty claim and cite recent work.",
                         "thread_id": "reviewer_1_thread_001",
+                        "span_role": "primary",
                         "comment_ids": ["atomic_001"],
                     },
                     {
-                        "coverage_status": "uncovered",
-                        "segment_text": "\n\n",
-                        "thread_id": None,
-                        "comment_ids": [],
+                        "coverage_status": "covered",
+                        "segment_text": (
+                            "\n\n"
+                            "The manuscript currently only provides a heading-level statement, while the detailed rationale, "
+                            "expected scope, and concrete evaluation requests remain in this paragraph and should be tracked "
+                            "as supporting coverage instead of staying invisible in the review trace.\n\n"
+                        ),
+                        "thread_id": "reviewer_1_thread_001",
+                        "span_role": "supporting",
+                        "comment_ids": ["atomic_001"],
                     },
                     {
                         "coverage_status": "covered",
                         "segment_text": "Add an ablation study for the decoder.\nDiscuss the failure case.",
                         "thread_id": "reviewer_1_thread_002",
+                        "span_role": "primary",
                         "comment_ids": ["atomic_002", "atomic_003"],
                     },
                     {
@@ -201,6 +212,7 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
                         "coverage_status": "covered",
                         "segment_text": "Editor note: keep wording concise.",
                         "thread_id": "reviewer_1_thread_001",
+                        "span_role": "duplicate_filtered",
                         "comment_ids": ["atomic_001"],
                     }
                 ],
@@ -213,12 +225,23 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     assert payload["status"] == "ok"
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "request_stage3_coverage_confirmation"
     assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage3_clear_coverage_confirmation"
+    assert isinstance(payload["instruction_payload"]["coverage_review_advisories"], list)
     assert all(action["action_id"] != "enter_stage_4" for action in payload["instruction_payload"]["allowed_next_actions"])
     coverage_view = (artifact_root / "06-review-comment-coverage.md").read_text(encoding="utf-8")
-    assert "[[covered thread:reviewer_1_thread_001 comments:atomic_001]]Please clarify the novelty claim and cite recent work.[[/covered]]" in coverage_view
-    assert "[[covered thread:reviewer_1_thread_002 comments:atomic_002,atomic_003]]Add an ablation study for the decoder." in coverage_view
+    assert "[[covered" not in coverage_view
+    assert "color: #d32f2f" in coverage_view
+    assert "color: #f57c00" in coverage_view
+    assert "[R1_T001 dup]" in coverage_view
+    assert "[R1_T002]" in coverage_view
+    assert "Please clarify the novelty claim and cite recent work." in coverage_view
+    assert "覆盖映射附录" in coverage_view
+    assert "`reviewer_1_thread_002`" in coverage_view
+    assert "`duplicate_filtered`" in coverage_view
+    assert "`atomic_002, atomic_003`" in coverage_view
     assert "This final sentence is still uncovered." in coverage_view
     assert "Editor Letter Source" in coverage_view
+    raw_threads_view = (artifact_root / "03-raw-review-thread-list.md").read_text(encoding="utf-8")
+    assert "expected scope, and concrete evaluation requests remain in this paragraph" in raw_threads_view
 
     with sqlite3.connect(db_path) as connection:
         connection.execute("DELETE FROM workflow_pending_user_confirmations")
@@ -245,7 +268,7 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     assert cleared_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "enter_stage_4"
 
 
-def test_stage3_missing_segment_comment_links_is_blocked(tmp_path: Path) -> None:
+def test_stage3_missing_thread_source_spans_is_blocked(tmp_path: Path) -> None:
     artifact_root = tmp_path / "workspace"
     copied_workspace = copy_tree(
         ROOT / "playbooks" / "examples" / "happy-path-minimal" / "workspace",
@@ -283,33 +306,86 @@ def test_stage3_missing_segment_comment_links_is_blocked(tmp_path: Path) -> None
         connection.execute("INSERT INTO resume_must_not_forget (position, message) VALUES (1, 'Covered segments must link to comment_id records.')")
         connection.commit()
 
-    write_review_comment_coverage_truth(
-        db_path,
-        [
-            {
-                "source_document_id": "review_comments_source_001",
-                "source_kind": "review_comments_source",
-                "document_order": 1,
-                "source_label": "Review Comments Source",
-                "source_path": "tests://review-comments.md",
-                "original_text": "This segment is marked covered but has no comment links.",
-                "segments": [
-                    {
-                        "coverage_status": "covered",
-                        "segment_text": "This segment is marked covered but has no comment links.",
-                        "thread_id": "reviewer_1_thread_001",
-                        "comment_ids": [],
-                    }
-                ],
-            }
-        ],
-    )
+    seed_review_comment_coverage_from_threads(db_path)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(
+            """
+            DELETE FROM raw_thread_source_spans
+            WHERE thread_id = 'reviewer_1_thread_001'
+            """
+        )
+        connection.commit()
 
     payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
 
     assert payload["status"] == "issues_found"
     assert payload["summary"]["total_issue_count"] > 0
     assert any(
-        issue["artifact"] == "review_comment_coverage_segment_comment_links"
+        issue["artifact"] == "raw_thread_source_spans"
+        for issue in payload["format_errors"] + payload["dependency_errors"]
+    )
+
+
+def test_stage3_invalid_source_span_offsets_are_blocked(tmp_path: Path) -> None:
+    copied_workspace = copy_tree(
+        ROOT / "playbooks" / "examples" / "happy-path-minimal" / "workspace",
+        tmp_path / "workspace",
+    )
+    db_path = copied_workspace / "review-master.db"
+    seed_review_comment_coverage_from_threads(db_path)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(
+            """
+            UPDATE raw_thread_source_spans
+            SET end_offset = end_offset + 5000
+            WHERE thread_id = (
+                SELECT thread_id
+                FROM raw_thread_source_spans
+                ORDER BY thread_id, source_document_id, span_order
+                LIMIT 1
+            )
+            """
+        )
+        connection.commit()
+
+    payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
+
+    assert payload["status"] == "issues_found"
+    assert any(
+        issue["artifact"] == "raw_thread_source_spans" and issue["issue"] in {"span_out_of_bounds", "span_text_mismatch"}
+        for issue in payload["format_errors"] + payload["dependency_errors"]
+    )
+
+
+def test_stage3_thread_requires_primary_span(tmp_path: Path) -> None:
+    copied_workspace = copy_tree(
+        ROOT / "playbooks" / "examples" / "happy-path-minimal" / "workspace",
+        tmp_path / "workspace",
+    )
+    db_path = copied_workspace / "review-master.db"
+    seed_review_comment_coverage_from_threads(db_path)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(
+            """
+            UPDATE raw_thread_source_spans
+            SET span_role = 'supporting'
+            WHERE thread_id = (
+                SELECT thread_id
+                FROM raw_thread_source_spans
+                ORDER BY thread_id, source_document_id, span_order
+                LIMIT 1
+            )
+            """
+        )
+        connection.commit()
+
+    payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
+
+    assert payload["status"] == "issues_found"
+    assert any(
+        issue["artifact"] == "raw_thread_source_spans" and issue["issue"] == "missing_primary_span"
         for issue in payload["format_errors"] + payload["dependency_errors"]
     )

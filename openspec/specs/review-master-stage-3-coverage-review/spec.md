@@ -7,19 +7,13 @@ TBD - created by archiving change add-stage3-coverage-review-gate. Update Purpos
 
 Stage 3 MUST render a read-only coverage-review artifact that shows how the extracted review-comment truth covers the original source text.
 
-#### Scenario: coverage artifact exists after Stage 3 modeling
-
-- **WHEN** Stage 3 finishes writing `raw_review_threads`, `atomic_comments`, `raw_thread_atomic_links`, and `atomic_comment_source_spans`
-- **THEN** it MUST also write `review_comment_source_documents`
-- **AND** it MUST write `review_comment_coverage_segments`
-- **AND** it MUST write `review_comment_coverage_segment_comment_links`
-- **AND** the workspace MUST render `review-comment-coverage.md`
-
-#### Scenario: coverage artifact shows covered and uncovered text inline
+#### Scenario: coverage artifact shows readable original text with visual highlighting
 
 - **WHEN** `review-comment-coverage.md` is rendered
-- **THEN** covered text MUST appear inline as `[[covered thread:<thread_id> comments:<comment_id,...>]]...[[/covered]]`
+- **THEN** covered source spans MUST be visually emphasized in the body (bold red highlight)
 - **AND** uncovered source text MUST remain visible without being hidden or dropped
+- **AND** the artifact MUST include a coverage-mapping appendix that lists covered segments with `source_document_id`, `segment_order`, `thread_id`, and mapped `comment_id` values
+- **AND** the body MUST NOT rely on inline wrapper syntax like `[[covered ...]]...[[/covered]]` to express coverage status
 
 ### Requirement: Stage 3 coverage review requires user confirmation
 

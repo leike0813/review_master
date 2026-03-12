@@ -18,19 +18,14 @@ The first release of `review-master` SHALL provide six standalone Markdown templ
 - **THEN** `review-master/references/` contains all six named Markdown files
 
 ### Requirement: Template format style
-Each template MUST use the format pattern:
 
-- title
-- purpose description
-- field definitions
-- table or checklist skeleton
+The Stage 3 coverage template MUST expose span roles in both body and appendix.
 
-The templates MUST be table-driven or checklist-driven rather than narrative-first templates.
+#### Scenario: appendix mapping includes span role
 
-#### Scenario: Template remains skeleton-only
-- **WHEN** a template is opened
-- **THEN** it presents an empty reusable skeleton with field guidance
-- **AND** does not rely on embedded example data to explain the format
+- **WHEN** `06-review-comment-coverage.md` is generated
+- **THEN** the appendix table MUST include `span_role` per covered span row
+- **AND** body highlight color MUST be consistent with appendix role mapping
 
 ### Requirement: Minimum role of each template
 The templates MUST cover the minimum roles below:
@@ -46,4 +41,15 @@ The templates MUST cover the minimum roles below:
 - **WHEN** `response-strategy-card.md` is used
 - **THEN** it must serve exactly one `comment_id`
 - **AND** must not combine multiple comments into one card
+
+### Requirement: Stage 3 coverage template must separate reading view and mapping view
+
+The Stage 3 coverage template MUST combine a readable highlighted body with a separate mapping appendix.
+
+#### Scenario: coverage template structure
+
+- **WHEN** `06-review-comment-coverage.md` is rendered
+- **THEN** the template MUST include an original-text coverage body where covered spans are visually emphasized
+- **AND** it MUST include a mapping appendix table for covered segments (`thread_id` and `comment_id` mapping)
+- **AND** uncovered text MUST remain visible in the body
 

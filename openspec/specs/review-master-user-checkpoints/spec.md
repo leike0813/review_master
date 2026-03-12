@@ -4,24 +4,24 @@
 TBD - created by archiving change define-review-master-staged-workflow. Update Purpose after archive.
 ## Requirements
 ### Requirement: Mandatory user checkpoints
+
 User interaction SHALL be a mandatory control mechanism in the first release, not an optional enhancement.
 
 At minimum, the workflow MUST include the following checkpoints:
 
 - initial submission of manuscript and review comments
 - entry confirmation when a project directory contains multiple plausible main `.tex` files
+- Stage 3 coverage review confirmation based on the rendered original-text coverage artifact
 - revision-board confirmation after decomposition, mapping, prioritization, and ordering
 - per-comment confirmation before executing manuscript changes for that comment
 - evidence supplementation when a comment cannot be completed from current inputs
 - final review before final export
 
-#### Scenario: Ambiguous project entry requires user confirmation
-- **WHEN** the manuscript input is a LaTeX project directory and the workflow finds multiple plausible main `.tex` candidates
-- **THEN** it must ask the user to confirm the main entry before continuing
+#### Scenario: Stage 3 coverage confirmation uses readable highlighted artifact
 
-#### Scenario: Revision board requires confirmation
-- **WHEN** the workflow completes decomposition, mapping, and prioritization
-- **THEN** it must present the revision board to the user and wait for confirmation of the processing order
+- **WHEN** Stage 3 extraction and mapping are complete
+- **THEN** the workflow must present `06-review-comment-coverage.md` for explicit user confirmation
+- **AND** the user must be able to identify covered text visually and verify mapping details from the appendix before Stage 4
 
 ### Requirement: Per-comment confirmation is required before execution
 

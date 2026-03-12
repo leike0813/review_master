@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import json
 import re
 import shutil
@@ -62,6 +63,20 @@ def ensure_review_comment_coverage_tables(connection: sqlite3.Connection) -> Non
             source_label TEXT NOT NULL DEFAULT '',
             source_path TEXT NOT NULL DEFAULT '',
             original_text TEXT NOT NULL
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS raw_thread_source_spans (
+            thread_id TEXT NOT NULL REFERENCES raw_review_threads(thread_id) ON DELETE CASCADE,
+            source_document_id TEXT NOT NULL REFERENCES review_comment_source_documents(source_document_id) ON DELETE CASCADE,
+            span_order INTEGER NOT NULL,
+            span_role TEXT NOT NULL CHECK (span_role IN ('primary', 'supporting', 'duplicate_filtered')),
+            start_offset INTEGER NOT NULL CHECK (start_offset >= 0),
+            end_offset INTEGER NOT NULL CHECK (end_offset > start_offset),
+            span_text TEXT NOT NULL,
+            PRIMARY KEY (thread_id, source_document_id, span_order)
         )
         """
     )
@@ -179,8 +194,11 @@ def write_review_comment_coverage_truth(db_path: Path, documents: list[dict]) ->
         ensure_supplement_suggestion_tables(connection)
         connection.execute("DELETE FROM review_comment_coverage_segment_comment_links")
         connection.execute("DELETE FROM review_comment_coverage_segments")
+        connection.execute("DELETE FROM raw_thread_source_spans")
         connection.execute("DELETE FROM review_comment_source_documents")
         for document in documents:
+            source_document_id = document["source_document_id"]
+            original_text = document["original_text"]
             connection.execute(
                 """
                 INSERT INTO review_comment_source_documents (
@@ -188,15 +206,57 @@ def write_review_comment_coverage_truth(db_path: Path, documents: list[dict]) ->
                 ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    document["source_document_id"],
+                    source_document_id,
                     document["source_kind"],
                     document["document_order"],
                     document["source_label"],
                     document["source_path"],
-                    document["original_text"],
+                    original_text,
                 ),
             )
-            for segment_order, segment in enumerate(document["segments"], start=1):
+            span_order_by_thread_doc: dict[tuple[str, str], int] = defaultdict(int)
+            if "spans" in document:
+                for span in document["spans"]:
+                    thread_id = str(span["thread_id"])
+                    if "span_order" in span:
+                        span_order = int(span["span_order"])
+                    else:
+                        span_order_by_thread_doc[(thread_id, source_document_id)] += 1
+                        span_order = span_order_by_thread_doc[(thread_id, source_document_id)]
+                    span_role = str(span.get("span_role", "primary"))
+                    start_offset = int(span["start_offset"])
+                    end_offset = int(span["end_offset"])
+                    span_text = str(span.get("span_text", original_text[start_offset:end_offset]))
+                    connection.execute(
+                        """
+                        INSERT INTO raw_thread_source_spans (
+                            thread_id, source_document_id, span_order, span_role, start_offset, end_offset, span_text
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            thread_id,
+                            source_document_id,
+                            span_order,
+                            span_role,
+                            start_offset,
+                            end_offset,
+                            span_text,
+                        ),
+                    )
+            cursor = 0
+            for segment_order, segment in enumerate(document.get("segments", []), start=1):
+                segment_text = str(segment["segment_text"])
+                segment_len = len(segment_text)
+                if segment_len > 0:
+                    expected = original_text[cursor : cursor + segment_len]
+                    if expected != segment_text:
+                        raise AssertionError(
+                            "segment_text does not match original_text reconstruction "
+                            f"at source_document_id={source_document_id}, segment_order={segment_order}"
+                        )
+                start_offset = cursor
+                end_offset = cursor + segment_len
+                cursor = end_offset
                 connection.execute(
                     """
                     INSERT INTO review_comment_coverage_segments (
@@ -204,13 +264,33 @@ def write_review_comment_coverage_truth(db_path: Path, documents: list[dict]) ->
                     ) VALUES (?, ?, ?, ?, ?)
                     """,
                     (
-                        document["source_document_id"],
+                        source_document_id,
                         segment_order,
                         segment["coverage_status"],
-                        segment["segment_text"],
+                        segment_text,
                         segment.get("thread_id"),
                     ),
                 )
+                thread_id = str(segment.get("thread_id") or "")
+                if segment.get("coverage_status") == "covered" and thread_id and segment_len > 0 and "spans" not in document:
+                    span_order_by_thread_doc[(thread_id, source_document_id)] += 1
+                    span_role = str(segment.get("span_role", "primary"))
+                    connection.execute(
+                        """
+                        INSERT INTO raw_thread_source_spans (
+                            thread_id, source_document_id, span_order, span_role, start_offset, end_offset, span_text
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            thread_id,
+                            source_document_id,
+                            span_order_by_thread_doc[(thread_id, source_document_id)],
+                            span_role,
+                            start_offset,
+                            end_offset,
+                            segment_text,
+                        ),
+                    )
                 for link_order, comment_id in enumerate(segment.get("comment_ids", []), start=1):
                     connection.execute(
                         """
@@ -219,12 +299,16 @@ def write_review_comment_coverage_truth(db_path: Path, documents: list[dict]) ->
                         ) VALUES (?, ?, ?, ?)
                         """,
                         (
-                            document["source_document_id"],
+                            source_document_id,
                             segment_order,
                             link_order,
                             comment_id,
                         ),
                     )
+            if "segments" in document and cursor != len(original_text):
+                raise AssertionError(
+                    f"segments do not fully reconstruct original_text for source_document_id={source_document_id}"
+                )
         connection.commit()
 
 

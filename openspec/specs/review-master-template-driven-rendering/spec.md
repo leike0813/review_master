@@ -7,17 +7,12 @@ TBD - created by archiving change restructure-review-master-package-for-template
 
 The runtime scripts MUST no longer hardcode the SQLite schema statements or Markdown view skeletons, and they MUST support workspace-local localization overlays on top of packaged assets.
 
-#### Scenario: rendered view set includes supplement suggestion planning
+#### Scenario: rendered Stage 3 coverage view is highlight-based and user-readable
 
-- **WHEN** the renderer materializes the runtime workspace views
-- **THEN** it MUST include `supplement-suggestion-plan.md`
-- **AND** that view MUST be rendered from database truth rather than by modifying the user’s source files
-
-#### Scenario: strategy card rendering is phase-aware
-
-- **WHEN** a Stage 5 strategy card is rendered before user confirmation
-- **THEN** it MUST show the pending confirmation state
-- **AND** it MUST explain that drafts are not yet authored until confirmation
+- **WHEN** the renderer materializes `06-review-comment-coverage.md`
+- **THEN** it MUST render the body as readable original text with visual highlight for covered spans
+- **AND** it MUST render a structured mapping appendix from database truth
+- **AND** it MUST not emit inline machine wrappers such as `[[covered ...]]` in the body
 
 ### Requirement: `workflow-state.md` MUST be retired as a rendered runtime view
 

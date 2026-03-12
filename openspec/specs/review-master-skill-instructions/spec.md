@@ -4,6 +4,7 @@
 TBD - created by archiving change implement-review-master-skill-contract. Update Purpose after archive.
 ## Requirements
 ### Requirement: SKILL.md must define the executable six-stage workflow
+
 `review-master/SKILL.md` MUST replace the previous generic four-stage outline with a first-release six-stage executable workflow:
 
 1. 输入接收与入口解析
@@ -15,14 +16,12 @@ TBD - created by archiving change implement-review-master-skill-contract. Update
 
 For each stage, `SKILL.md` MUST describe the purpose, inputs, outputs, and gate conditions for moving forward.
 
-#### Scenario: Stage 4 remains mandatory
-- **WHEN** the workflow has completed early analysis
-- **THEN** `SKILL.md` must still require stage 4 completion before any final manuscript rewriting or final response-letter assembly can begin
+#### Scenario: Stage 3 instructions define highlighted coverage review semantics
 
-#### Scenario: Stage instructions cite numbered artifacts
-- **WHEN** `SKILL.md` tells the user which runtime artifacts to inspect during a stage
-- **THEN** it must cite the numbered filenames for all non-strategy-card artifacts
-- **AND** it must keep `response-strategy-cards/{comment_id}.md` as the strategy-card reference form
+- **WHEN** `SKILL.md` describes Stage 3 coverage confirmation
+- **THEN** it MUST state that `06-review-comment-coverage.md` uses visually highlighted covered spans and default-style uncovered spans in a near-original-text body
+- **AND** it MUST state that mapping verification is done through the artifact appendix table
+- **AND** it MUST keep the rule that Stage 4 is blocked until user confirmation
 
 ### Requirement: Per-comment closed-loop execution in SKILL.md
 
