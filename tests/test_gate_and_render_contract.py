@@ -226,11 +226,20 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "request_stage3_coverage_confirmation"
     assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage3_clear_coverage_confirmation"
     assert isinstance(payload["instruction_payload"]["coverage_review_advisories"], list)
+    coverage_metrics = payload["instruction_payload"]["coverage_review_metrics"]
+    assert coverage_metrics["metric_type"] == "character_coverage"
+    assert coverage_metrics["scope"] == "global"
+    assert coverage_metrics["thresholds"]["hard_percent"] == 30.0
+    assert coverage_metrics["thresholds"]["soft_percent"] == 50.0
+    assert coverage_metrics["gate_status"] == "pass"
+    assert coverage_metrics["global"]["coverage_percent_including_duplicates"] >= 50.0
     assert all(action["action_id"] != "enter_stage_4" for action in payload["instruction_payload"]["allowed_next_actions"])
     coverage_view = (artifact_root / "06-review-comment-coverage.md").read_text(encoding="utf-8")
     assert "[[covered" not in coverage_view
     assert "color: #d32f2f" in coverage_view
     assert "color: #f57c00" in coverage_view
+    assert "字符级覆盖率指标" in coverage_view
+    assert "全局覆盖率（含 duplicate_filtered）" in coverage_view
     assert "[R1_T001 dup]" in coverage_view
     assert "[R1_T002]" in coverage_view
     assert "Please clarify the novelty claim and cite recent work." in coverage_view
@@ -266,6 +275,143 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     cleared_payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(artifact_root))
     assert cleared_payload["status"] == "ok"
     assert cleared_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "enter_stage_4"
+
+
+def _prepare_stage3_threshold_workspace(tmp_path: Path, *, covered_chars: int, total_chars: int = 100) -> Path:
+    artifact_root = tmp_path / "workspace"
+    run_python_script(
+        INIT_SCRIPT,
+        "--artifact-root",
+        str(artifact_root),
+        "--document-language",
+        "en",
+        "--working-language",
+        "zh-CN",
+    )
+    db_path = artifact_root / "review-master.db"
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("UPDATE manuscript_summary SET main_entry = 'main.tex', project_shape = 'single_tex', high_risk_areas = 'discussion'")
+        connection.execute(
+            """
+            INSERT INTO raw_review_threads (thread_id, reviewer_id, thread_order, source_type, original_text, normalized_summary)
+            VALUES ('reviewer_1_thread_001', 'reviewer_1', 1, 'reviewer_comment', 'Need more evidence.', 'Need more evidence')
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO atomic_comments (comment_id, comment_order, canonical_summary, required_action)
+            VALUES ('atomic_001', 1, 'Need more evidence', 'Provide stronger evidence')
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO raw_thread_atomic_links (thread_id, comment_id, link_order)
+            VALUES ('reviewer_1_thread_001', 'atomic_001', 1)
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO atomic_comment_source_spans (comment_id, thread_id, excerpt_text, note)
+            VALUES ('atomic_001', 'reviewer_1_thread_001', 'Need more evidence.', 'threshold-test')
+            """
+        )
+        connection.execute("DELETE FROM workflow_pending_user_confirmations")
+        connection.execute("DELETE FROM workflow_global_blockers")
+        connection.execute(
+            """
+            UPDATE workflow_state
+            SET current_stage = 'stage_3', stage_gate = 'ready', active_comment_id = NULL, next_action = 'enter_stage_4'
+            WHERE id = 1
+            """
+        )
+        connection.execute(
+            """
+            UPDATE resume_brief
+            SET resume_status = 'active',
+                current_objective = 'Validate Stage 3 character coverage gate.',
+                current_focus = 'Stage 3 character coverage',
+                why_paused = 'Threshold gate check.',
+                next_operator_action = 'Inspect 06-review-comment-coverage.md.'
+            WHERE id = 1
+            """
+        )
+        connection.execute("DELETE FROM resume_recent_decisions")
+        connection.execute("DELETE FROM resume_must_not_forget")
+        connection.execute(
+            "INSERT INTO resume_recent_decisions (position, message) VALUES (1, 'Prepared Stage 3 threshold test workspace.')"
+        )
+        connection.execute(
+            "INSERT INTO resume_must_not_forget (position, message) VALUES (1, 'Character coverage thresholds must be enforced.')"
+        )
+        connection.commit()
+    covered_chars = max(1, min(covered_chars, total_chars))
+    original_text = "A" * total_chars
+    segments: list[dict[str, object]] = [
+        {
+            "coverage_status": "covered",
+            "segment_text": original_text[:covered_chars],
+            "thread_id": "reviewer_1_thread_001",
+            "span_role": "primary",
+            "comment_ids": ["atomic_001"],
+        }
+    ]
+    if covered_chars < total_chars:
+        segments.append(
+            {
+                "coverage_status": "uncovered",
+                "segment_text": original_text[covered_chars:],
+                "thread_id": None,
+                "comment_ids": [],
+            }
+        )
+    write_review_comment_coverage_truth(
+        db_path,
+        [
+            {
+                "source_document_id": "review_comments_source_001",
+                "source_kind": "review_comments_source",
+                "document_order": 1,
+                "source_label": "Review Comments Source",
+                "source_path": "tests://threshold-source.md",
+                "original_text": original_text,
+                "segments": segments,
+            }
+        ],
+    )
+    return artifact_root
+
+
+def test_stage3_character_coverage_below_hard_threshold_is_blocked(tmp_path: Path) -> None:
+    artifact_root = _prepare_stage3_threshold_workspace(tmp_path, covered_chars=20, total_chars=100)
+    payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(artifact_root))
+
+    assert payload["status"] == "issues_found"
+    assert any(
+        issue["artifact"] == "raw_thread_source_spans" and issue["issue"] == "coverage_below_hard_threshold"
+        for issue in payload["dependency_errors"]
+    )
+    metrics = payload["instruction_payload"]["coverage_review_metrics"]
+    assert metrics["gate_status"] == "hard_fail"
+    assert metrics["global"]["coverage_percent_including_duplicates"] == 20.0
+    assert metrics["thresholds"]["hard_percent"] == 30.0
+    assert metrics["thresholds"]["soft_percent"] == 50.0
+
+
+def test_stage3_character_coverage_soft_threshold_adds_advisory(tmp_path: Path) -> None:
+    artifact_root = _prepare_stage3_threshold_workspace(tmp_path, covered_chars=40, total_chars=100)
+    payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(artifact_root))
+
+    assert payload["status"] == "ok"
+    metrics = payload["instruction_payload"]["coverage_review_metrics"]
+    assert metrics["gate_status"] == "soft_warn"
+    assert metrics["global"]["coverage_percent_including_duplicates"] == 40.0
+    assert not any(issue["issue"] == "coverage_below_hard_threshold" for issue in payload["dependency_errors"])
+    advisories = payload["instruction_payload"]["coverage_review_advisories"]
+    assert any("40.00%" in item for item in advisories)
+    coverage_view = (artifact_root / "06-review-comment-coverage.md").read_text(encoding="utf-8")
+    assert "当前阈值判定：" in coverage_view
+    assert "软提示（介于 hard 与 soft 之间）" in coverage_view
 
 
 def test_stage3_missing_thread_source_spans_is_blocked(tmp_path: Path) -> None:

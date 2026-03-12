@@ -5,14 +5,14 @@ TBD - created by archiving change restructure-review-master-package-for-template
 ## Requirements
 ### Requirement: runtime rendering MUST load schema and templates from `assets/`
 
-The runtime scripts MUST no longer hardcode the SQLite schema statements or Markdown view skeletons, and they MUST support workspace-local localization overlays on top of packaged assets.
+Stage 3 coverage rendering MUST expose character-level coverage metrics alongside highlighted source text.
 
-#### Scenario: rendered Stage 3 coverage view is highlight-based and user-readable
+#### Scenario: rendered coverage view includes thresholded character metrics
 
 - **WHEN** the renderer materializes `06-review-comment-coverage.md`
-- **THEN** it MUST render the body as readable original text with visual highlight for covered spans
-- **AND** it MUST render a structured mapping appendix from database truth
-- **AND** it MUST not emit inline machine wrappers such as `[[covered ...]]` in the body
+- **THEN** it MUST include a character-level coverage metrics section with global and per-document values
+- **AND** it MUST show hard/soft thresholds and current gate classification
+- **AND** it MUST keep the readable highlighted source body and mapping appendix
 
 ### Requirement: `workflow-state.md` MUST be retired as a rendered runtime view
 

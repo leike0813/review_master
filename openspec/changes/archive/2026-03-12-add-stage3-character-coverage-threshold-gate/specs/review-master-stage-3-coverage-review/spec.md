@@ -1,8 +1,5 @@
-# review-master-stage-3-coverage-review Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change add-stage3-coverage-review-gate. Update Purpose after archive.
-## Requirements
 ### Requirement: Stage 3 must produce a coverage-review artifact before Stage 4
 
 Stage 3 coverage review MUST include character-level quantitative metrics and threshold-based gate semantics.
@@ -25,21 +22,3 @@ Stage 3 coverage review MUST include character-level quantitative metrics and th
 - **AND** Stage 3 progression remains controlled by user-confirmation gate
 - **WHEN** coverage is at least `50%`
 - **THEN** no threshold advisory is required
-
-### Requirement: Stage 3 coverage review requires user confirmation
-
-After Stage 3 coverage truth is written, the workflow MUST stop for user confirmation before Stage 4 workboard planning can begin.
-
-#### Scenario: Stage 3 cannot enter Stage 4 before confirmation
-
-- **WHEN** `workflow_state.current_stage` is `stage_3`
-- **AND** Stage 3 coverage confirmations are still pending
-- **THEN** the recommended next action MUST be `request_stage3_coverage_confirmation`
-- **AND** the workflow MUST NOT recommend `enter_stage_4`
-
-#### Scenario: confirmation clear reopens Stage 3 for Stage 4 entry
-
-- **WHEN** the user confirms the Stage 3 coverage artifact
-- **THEN** the workflow may clear the Stage 3 pending confirmations
-- **AND** the next action may become `enter_stage_4`
-

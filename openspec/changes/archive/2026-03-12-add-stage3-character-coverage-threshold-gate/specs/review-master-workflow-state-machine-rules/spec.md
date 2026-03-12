@@ -1,8 +1,5 @@
-# review-master-workflow-state-machine-rules Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change define-review-master-state-machine-instruction-loop. Update Purpose after archive.
-## Requirements
 ### Requirement: The first release must define workflow state-machine rules
 
 Stage 3 rules MUST define threshold-based coverage diagnostics before user confirmation.
@@ -20,4 +17,3 @@ Stage 3 rules MUST define threshold-based coverage diagnostics before user confi
 - **AND** global coverage is between hard and soft thresholds
 - **THEN** state-machine output MUST include advisory guidance
 - **AND** Stage 3 still proceeds through the existing user-confirmation gate
-

@@ -1,8 +1,5 @@
-# review-master-validator-instruction-payload Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change define-review-master-state-machine-instruction-loop. Update Purpose after archive.
-## Requirements
 ### Requirement: Validator must emit an instruction payload
 
 Stage 3 instruction payload MUST include structured character-coverage metrics.
@@ -18,4 +15,3 @@ Stage 3 instruction payload MUST include structured character-coverage metrics.
   - `per_document`
   - `gate_status`
 - **AND** `global` metrics MUST include duplicate-aware and non-duplicate character coverage values
-

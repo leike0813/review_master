@@ -32,13 +32,15 @@ At minimum, `SKILL.md` MUST define the role of:
 
 ### Requirement: Artifact generation timing and purpose
 
-`06-review-comment-coverage.md` MUST keep original-text readability while showing extraction role semantics.
+`06-review-comment-coverage.md` MUST expose both qualitative highlighting and quantitative character-coverage signals.
 
-#### Scenario: duplicate visibility without summary pollution
+#### Scenario: coverage artifact includes duplicate-aware character metrics
 
-- **WHEN** repeated substantive text is deduplicated in canonical summaries
-- **THEN** coverage artifact MUST still visibly highlight repeated source locations
-- **AND** those repeated highlights MUST be visually distinct from normal covered spans
+- **WHEN** Stage 3 coverage artifact is generated
+- **THEN** it MUST display a global character coverage value that includes `duplicate_filtered` spans
+- **AND** it MUST display a global non-duplicate diagnostic value
+- **AND** it MUST display per-document character coverage details
+- **AND** it MUST display threshold references and current classification (`hard_fail` / `soft_warn` / `pass`)
 
 ### Requirement: No template files required in this change
 This change MUST define the Markdown artifacts in `SKILL.md` without requiring dedicated template files under `review-master/references/`.

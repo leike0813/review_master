@@ -19,13 +19,15 @@ The first release of `review-master` SHALL provide six standalone Markdown templ
 
 ### Requirement: Template format style
 
-The Stage 3 coverage template MUST expose span roles in both body and appendix.
+The Stage 3 coverage template MUST expose threshold-ready character metrics.
 
-#### Scenario: appendix mapping includes span role
+#### Scenario: coverage template renders character-metric summary
 
 - **WHEN** `06-review-comment-coverage.md` is generated
-- **THEN** the appendix table MUST include `span_role` per covered span row
-- **AND** body highlight color MUST be consistent with appendix role mapping
+- **THEN** the template MUST render global character coverage (duplicate-aware)
+- **AND** it MUST render non-duplicate diagnostic coverage
+- **AND** it MUST render per-document character metrics
+- **AND** it MUST render hard/soft threshold values and current gate status text
 
 ### Requirement: Minimum role of each template
 The templates MUST cover the minimum roles below:
