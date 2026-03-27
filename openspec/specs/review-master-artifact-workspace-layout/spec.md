@@ -17,30 +17,22 @@ At minimum, each workspace root must contain:
 - `05-thread-to-atomic-mapping.md`
 - `06-review-comment-coverage.md`
 - `07-atomic-comment-workboard.md`
-- `08-style-profile.md`
-- `09-action-copy-variants.md`
-- `10-response-letter-outline.md`
-- `11-export-patch-plan.md`
-- `12-response-letter-table-preview.md`
-- `13-response-letter-table-preview.tex`
-- `14-supplement-suggestion-plan.md`
+- `08-supplement-suggestion-plan.md`
+- `09-style-profile.md`
+- `10-action-copy-variants.md`
+- `11-response-letter-outline.md`
+- `12-export-patch-plan.md`
+- `13-response-letter-table-preview.md`
+- `14-response-letter-table-preview.tex`
 - `15-supplement-intake-plan.md`
 - `16-final-assembly-checklist.md`
 - `response-strategy-cards/`
 
 `review-master/references/` MUST remain the reference-template directory and MUST NOT be treated as a runtime workspace.
 
-#### Scenario: Runtime workspace uses fixed numbered filenames
-- **WHEN** an agent prepares a runtime artifact workspace
-- **THEN** the workspace uses the numbered filenames and strategy-card directory listed above
+#### Scenario: Runtime workspace uses reordered numbered filenames
 
-#### Scenario: Strategy cards remain unnumbered
-- **WHEN** the workspace renders per-comment strategy cards
-- **THEN** it keeps using `response-strategy-cards/{comment_id}.md`
-- **AND** it does not introduce numbered filenames for those card files
-
-#### Scenario: Reference templates are not the runtime workspace
-- **WHEN** an agent needs files to actively fill during workflow execution
-- **THEN** it initializes a runtime workspace
-- **AND** it does not write directly into `review-master/references/`
+- **WHEN** an agent prepares a runtime artifact workspace after this change
+- **THEN** the workspace MUST use the reordered numbered filenames listed above
+- **AND** `08-supplement-suggestion-plan.md` MUST appear before the Stage 6 style and export artifacts
 

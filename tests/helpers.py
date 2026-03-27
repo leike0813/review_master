@@ -142,6 +142,337 @@ def ensure_supplement_suggestion_tables(connection: sqlite3.Connection) -> None:
     )
 
 
+def ensure_stage5_execution_item_schema(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS strategy_action_manuscript_execution_items (
+            comment_id TEXT NOT NULL,
+            action_order INTEGER NOT NULL,
+            item_order INTEGER NOT NULL,
+            category TEXT NOT NULL CHECK (category IN ('modification_strategy', 'rewrite_polish', 'text_add_modify_delete', 'figure_update', 'data_supplement')),
+            content_text TEXT NOT NULL DEFAULT '',
+            rationale TEXT NOT NULL DEFAULT '',
+            target_scope_note TEXT NOT NULL DEFAULT '',
+            PRIMARY KEY (comment_id, action_order, item_order),
+            FOREIGN KEY (comment_id, action_order)
+                REFERENCES strategy_card_actions(comment_id, action_order)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    columns = list(connection.execute("PRAGMA table_info(comment_completion_status)").fetchall())
+    if not any(str(column[1]) == "manuscript_execution_items_done" for column in columns):
+        connection.execute(
+            "ALTER TABLE comment_completion_status ADD COLUMN manuscript_execution_items_done TEXT NOT NULL DEFAULT 'no'"
+        )
+    has_legacy_column = any(str(column[1]) == "manuscript_draft_done" for column in columns)
+    if has_legacy_column:
+        connection.execute(
+            """
+            UPDATE comment_completion_status
+            SET manuscript_execution_items_done = manuscript_draft_done
+            WHERE manuscript_execution_items_done IS NULL
+               OR TRIM(manuscript_execution_items_done) = ''
+               OR manuscript_execution_items_done = 'no'
+            """
+        )
+    else:
+        connection.execute(
+            """
+            UPDATE comment_completion_status
+            SET manuscript_execution_items_done = 'no'
+            WHERE manuscript_execution_items_done IS NULL OR TRIM(manuscript_execution_items_done) = ''
+            """
+        )
+
+
+def ensure_stage6_revision_loop_schema(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS workspace_manuscript_copies (
+            copy_role TEXT PRIMARY KEY,
+            source_kind TEXT NOT NULL CHECK (source_kind IN ('single_tex_file', 'project_directory')),
+            source_root TEXT NOT NULL DEFAULT '',
+            copy_root TEXT NOT NULL DEFAULT '',
+            main_entry_relative_path TEXT NOT NULL DEFAULT ''
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_plan_actions (
+            plan_action_id TEXT PRIMARY KEY,
+            plan_order INTEGER NOT NULL,
+            comment_id TEXT NOT NULL,
+            action_order INTEGER NOT NULL,
+            execution_category TEXT NOT NULL DEFAULT 'modification_strategy',
+            title TEXT NOT NULL DEFAULT '',
+            objective TEXT NOT NULL DEFAULT '',
+            suggested_change TEXT NOT NULL DEFAULT '',
+            evidence_requirement TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL CHECK (status IN ('todo', 'blocked', 'in_progress', 'completed', 'dismissed'))
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_plan_dependencies (
+            plan_action_id TEXT NOT NULL,
+            depends_on_plan_action_id TEXT NOT NULL,
+            PRIMARY KEY (plan_action_id, depends_on_plan_action_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_action_logs (
+            log_id TEXT PRIMARY KEY,
+            log_order INTEGER NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('draft', 'completed', 'cancelled')),
+            operator_role TEXT NOT NULL CHECK (operator_role IN ('agent', 'user', 'collaborative')),
+            summary TEXT NOT NULL DEFAULT '',
+            change_note TEXT NOT NULL DEFAULT '',
+            response_note TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT ''
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_action_log_plan_links (
+            log_id TEXT NOT NULL,
+            plan_action_id TEXT NOT NULL,
+            PRIMARY KEY (log_id, plan_action_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_action_log_thread_links (
+            log_id TEXT NOT NULL,
+            thread_id TEXT NOT NULL,
+            PRIMARY KEY (log_id, thread_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS revision_action_log_file_diffs (
+            log_id TEXT NOT NULL,
+            file_order INTEGER NOT NULL,
+            relative_path TEXT NOT NULL,
+            change_kind TEXT NOT NULL CHECK (change_kind IN ('modified', 'added', 'deleted')),
+            diff_excerpt TEXT NOT NULL DEFAULT '',
+            before_excerpt TEXT NOT NULL DEFAULT '',
+            after_excerpt TEXT NOT NULL DEFAULT '',
+            PRIMARY KEY (log_id, file_order)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS working_copy_file_state (
+            relative_path TEXT PRIMARY KEY,
+            snapshot_sha256 TEXT NOT NULL DEFAULT '',
+            last_audited_sha256 TEXT NOT NULL DEFAULT '',
+            current_sha256 TEXT NOT NULL DEFAULT '',
+            last_log_id TEXT NOT NULL DEFAULT ''
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS response_thread_action_log_links (
+            thread_id TEXT NOT NULL,
+            log_id TEXT NOT NULL,
+            link_order INTEGER NOT NULL,
+            PRIMARY KEY (thread_id, log_id)
+        )
+        """
+    )
+    columns = list(connection.execute("PRAGMA table_info(response_thread_rows)").fetchall())
+    if not any(str(column[1]) == "response_resolution_kind" for column in columns):
+        connection.execute(
+            "ALTER TABLE response_thread_rows ADD COLUMN response_resolution_kind TEXT NOT NULL DEFAULT 'revision_backed'"
+        )
+    connection.execute(
+        """
+        UPDATE response_thread_rows
+        SET response_resolution_kind = 'revision_backed'
+        WHERE response_resolution_kind IS NULL OR TRIM(response_resolution_kind) = ''
+        """
+    )
+    connection.execute(
+        """
+        INSERT OR IGNORE INTO export_artifacts (artifact_name, artifact_status, output_path)
+        VALUES
+            ('working_manuscript', 'pending', ''),
+            ('response_markdown', 'pending', ''),
+            ('response_latex', 'pending', ''),
+            ('latexdiff_manuscript', 'pending', '')
+        """
+    )
+
+
+def seed_stage6_revision_loop_from_legacy_state(db_path: Path) -> None:
+    artifact_root = db_path.parent
+    source_snapshot_root = artifact_root / "manuscript-copies" / "source-snapshot"
+    working_manuscript_root = artifact_root / "manuscript-copies" / "working-manuscript"
+    source_snapshot_root.mkdir(parents=True, exist_ok=True)
+    working_manuscript_root.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        ensure_stage6_revision_loop_schema(connection)
+        stage_row = connection.execute("SELECT current_stage FROM workflow_state WHERE id = 1").fetchone()
+        if stage_row is None or str(stage_row["current_stage"]) != "stage_6":
+            connection.commit()
+            return
+        connection.execute(
+            """
+            INSERT OR REPLACE INTO workspace_manuscript_copies (
+                copy_role, source_kind, source_root, copy_root, main_entry_relative_path
+            ) VALUES
+                ('source_snapshot', 'project_directory', ?, ?, 'main.tex'),
+                ('working_manuscript', 'project_directory', ?, ?, 'main.tex')
+            """,
+            (
+                str(source_snapshot_root),
+                str(source_snapshot_root),
+                str(working_manuscript_root),
+                str(working_manuscript_root),
+            ),
+        )
+        if connection.execute("SELECT 1 FROM revision_plan_actions LIMIT 1").fetchone() is None:
+            strategy_action_columns = {str(row[1]) for row in connection.execute("PRAGMA table_info(strategy_card_actions)").fetchall()}
+            summary_column = "action_summary" if "action_summary" in strategy_action_columns else "manuscript_change"
+            rationale_column = "rationale" if "rationale" in strategy_action_columns else "expected_response_letter_effect"
+            action_rows = list(
+                connection.execute(
+                    f"""
+                    SELECT sca.comment_id, sca.action_order,
+                           COALESCE(sca.{summary_column}, '') AS summary_text,
+                           COALESCE(sca.{rationale_column}, '') AS rationale_text
+                    FROM strategy_card_actions sca
+                    ORDER BY sca.comment_id, sca.action_order
+                    """
+                ).fetchall()
+            )
+            if action_rows:
+                for plan_order, row in enumerate(action_rows, start=1):
+                    comment_id = str(row["comment_id"])
+                    action_order = int(row["action_order"])
+                    connection.execute(
+                        """
+                        INSERT INTO revision_plan_actions (
+                            plan_action_id, plan_order, comment_id, action_order, execution_category,
+                            title, objective, suggested_change, evidence_requirement, status
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            f"{comment_id}_action_{action_order:03d}",
+                            plan_order,
+                            comment_id,
+                            action_order,
+                            "modification_strategy",
+                            str(row["summary_text"] or f"{comment_id} action {action_order}"),
+                            str(row["summary_text"] or ""),
+                            str(row["summary_text"] or ""),
+                            str(row["rationale_text"] or ""),
+                            "completed",
+                        ),
+                    )
+        if connection.execute("SELECT 1 FROM revision_action_logs LIMIT 1").fetchone() is None:
+            thread_rows = list(
+                connection.execute(
+                    """
+                    SELECT rtr.thread_id, COALESCE(rtr.response_resolution_kind, 'revision_backed') AS response_resolution_kind
+                    FROM response_thread_rows rtr
+                    ORDER BY rtr.thread_id
+                    """
+                ).fetchall()
+            )
+            comment_links = defaultdict(list)
+            for row in connection.execute(
+                "SELECT thread_id, comment_id FROM raw_thread_atomic_links ORDER BY thread_id, link_order, comment_id"
+            ).fetchall():
+                comment_links[str(row["thread_id"])].append(str(row["comment_id"]))
+            plan_links = defaultdict(list)
+            for row in connection.execute(
+                "SELECT plan_action_id, comment_id FROM revision_plan_actions ORDER BY plan_order, plan_action_id"
+            ).fetchall():
+                plan_links[str(row["comment_id"])].append(str(row["plan_action_id"]))
+            log_order = 1
+            for row in thread_rows:
+                thread_id = str(row["thread_id"])
+                if str(row["response_resolution_kind"]) == "response_only_resolution":
+                    continue
+                log_id = f"legacy_log_{log_order:03d}"
+                connection.execute(
+                    """
+                    INSERT INTO revision_action_logs (
+                        log_id, log_order, status, operator_role, summary, change_note, response_note, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        log_id,
+                        log_order,
+                        "completed",
+                        "collaborative",
+                        f"Legacy Stage 6 revision audit backfill for {thread_id}",
+                        "Backfilled from legacy exported Stage 6 workspace for contract compatibility.",
+                        "This revision log preserves thread-level traceability for the migrated Stage 6 contract.",
+                        "",
+                    ),
+                )
+                connection.execute(
+                    """
+                    INSERT INTO revision_action_log_thread_links (log_id, thread_id)
+                    VALUES (?, ?)
+                    """,
+                    (log_id, thread_id),
+                )
+                connection.execute(
+                    """
+                    INSERT INTO response_thread_action_log_links (thread_id, log_id, link_order)
+                    VALUES (?, ?, 1)
+                    """,
+                    (thread_id, log_id),
+                )
+                linked_plan_action_ids: list[str] = []
+                for comment_id in comment_links.get(thread_id, []):
+                    linked_plan_action_ids.extend(plan_links.get(comment_id, []))
+                for plan_action_id in sorted(set(linked_plan_action_ids)):
+                    connection.execute(
+                        """
+                        INSERT INTO revision_action_log_plan_links (log_id, plan_action_id)
+                        VALUES (?, ?)
+                        """,
+                        (log_id, plan_action_id),
+                    )
+                log_order += 1
+        connection.execute(
+            """
+            UPDATE export_artifacts
+            SET artifact_status = CASE artifact_name
+                WHEN 'working_manuscript' THEN 'ready'
+                WHEN 'response_markdown' THEN 'ready'
+                WHEN 'response_latex' THEN 'ready'
+                ELSE artifact_status
+            END,
+                output_path = CASE artifact_name
+                    WHEN 'working_manuscript' THEN 'manuscript-copies/working-manuscript'
+                    WHEN 'response_markdown' THEN COALESCE(NULLIF(output_path, ''), '15-response-letter-preview.md')
+                    WHEN 'response_latex' THEN COALESCE(NULLIF(output_path, ''), '16-response-letter-preview.tex')
+                    WHEN 'latexdiff_manuscript' THEN COALESCE(output_path, '')
+                    ELSE output_path
+                END
+            WHERE artifact_name IN ('working_manuscript', 'response_markdown', 'response_latex', 'latexdiff_manuscript')
+            """
+        )
+        connection.commit()
+
+
 def seed_supplement_suggestions_from_gaps(db_path: Path) -> None:
     with sqlite3.connect(db_path) as connection:
         connection.row_factory = sqlite3.Row
@@ -320,6 +651,7 @@ def seed_review_comment_coverage_from_threads(
     with sqlite3.connect(db_path) as connection:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
+        ensure_stage5_execution_item_schema(connection)
         thread_rows = list(
             connection.execute(
                 """
@@ -399,3 +731,4 @@ def seed_review_comment_coverage_from_threads(
         )
     write_review_comment_coverage_truth(db_path, documents)
     seed_supplement_suggestions_from_gaps(db_path)
+    seed_stage6_revision_loop_from_legacy_state(db_path)

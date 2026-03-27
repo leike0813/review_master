@@ -8,17 +8,11 @@ from tests.helpers import ROOT
 
 EXAMPLE_ROOT = ROOT / "playbooks" / "examples" / "transformer-three-review-major-revision"
 REQUIRED_SNAPSHOTS = {
-    "stage-1-entry-ready.json",
-    "stage-2-structure-ready.json",
-    "stage-3-atomic-ready.json",
-    "stage-4-workboard-confirmation-needed.json",
-    "stage-5-round-1-blocked.json",
-    "stage-5-round-1-ready.json",
-    "stage-5-round-2-blocked.json",
-    "stage-5-round-2-ready.json",
-    "stage-5-round-3-blocked.json",
-    "stage-5-round-3-ready.json",
-    "stage-6-export-ready.json",
+    "stage-1-enter-stage-2.json",
+    "stage-2-enter-stage-3.json",
+    "stage-3-request-stage3-coverage-confirmation.json",
+    "stage-4-request-stage4-confirmation.json",
+    "stage-5-request-pending-confirmation.json",
     "stage-6-completed.json",
 }
 
@@ -40,9 +34,10 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
         "user-supplements/round-3",
         "workspace",
         "workspace/response-strategy-cards",
+        "workspace/manuscript-copies",
+        "workspace/manuscript-copies/source-snapshot",
+        "workspace/manuscript-copies/working-manuscript",
         "outputs",
-        "outputs/marked-manuscript",
-        "outputs/revised-manuscript",
         "gate-and-render-output",
     ]
     for relative_dir in required_dirs:
@@ -54,13 +49,13 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
         "inputs/review-comments.md",
         "inputs/manuscript/main.tex",
         "workspace/review-master.db",
-        "workspace/15-supplement-intake-plan.md",
-        "workspace/05-thread-to-atomic-mapping.md",
-        "workspace/16-final-assembly-checklist.md",
+        "workspace/10-supplement-intake-plan.md",
+        "workspace/06-thread-to-atomic-mapping.md",
+        "workspace/17-final-assembly-checklist.md",
+        "workspace/11-manuscript-revision-guide.md",
+        "workspace/14-response-coverage-matrix.md",
         "outputs/response-letter.md",
         "outputs/response-letter.tex",
-        "outputs/marked-manuscript/main.tex",
-        "outputs/revised-manuscript/main.tex",
     ]
     for relative_file in required_files:
         assert (EXAMPLE_ROOT / relative_file).is_file()
@@ -69,7 +64,7 @@ def test_transformer_major_revision_runtime_example_structure() -> None:
 def test_transformer_major_revision_review_comments_traceability_and_mapping_align() -> None:
     review_comments = _read("inputs/review-comments.md")
     traceability = _read("reference/degradation-traceability.md")
-    mapping = _read("workspace/05-thread-to-atomic-mapping.md")
+    mapping = _read("workspace/06-thread-to-atomic-mapping.md")
 
     reviewer_sections = re.findall(r"^# Reviewer \d+$", review_comments, flags=re.MULTILINE)
     numbered_comments = re.findall(r"^\d+\. ", review_comments, flags=re.MULTILINE)
@@ -94,20 +89,35 @@ def test_transformer_major_revision_review_comments_traceability_and_mapping_ali
 
 def test_transformer_major_revision_runtime_outputs_are_complete() -> None:
     actual_snapshots = {path.name for path in (EXAMPLE_ROOT / "gate-and-render-output").iterdir() if path.is_file()}
-    final_checklist = _read("workspace/16-final-assembly-checklist.md")
+    final_checklist = _read("workspace/17-final-assembly-checklist.md")
     strategy_card = _read("workspace/response-strategy-cards/atomic_001.md")
     response_latex = _read("outputs/response-letter.tex")
 
     assert actual_snapshots == REQUIRED_SNAPSHOTS
-    assert "manuscript_draft_done" in final_checklist
+    assert "manuscript_execution_items_done" in final_checklist
     assert "response_draft_done" in final_checklist
-    assert "## 稿件草案" in strategy_card
+    assert "## 稿件执行项" in strategy_card
     assert "## Response 草案" in strategy_card
     assert "## Comment Blockers" in strategy_card
-    assert "| clean_manuscript | exported |" in final_checklist
-    assert "| marked_manuscript | exported |" in final_checklist
-    assert "| response_markdown | exported |" in final_checklist
-    assert "| response_latex | exported |" in final_checklist
+    assert "| working_manuscript | ready |" in final_checklist
+    assert "| response_markdown | ready |" in final_checklist
+    assert "| response_latex | ready |" in final_checklist
+    assert "response_thread_action_log_links" in final_checklist
     assert "\\documentclass" in response_latex
     assert "\\begin{document}" in response_latex
     assert "\\end{document}" in response_latex
+
+
+def test_transformer_major_revision_snapshot_actions_match_current_state_machine() -> None:
+    expected_actions = {
+        "stage-1-enter-stage-2.json": "enter_stage_2",
+        "stage-2-enter-stage-3.json": "enter_stage_3",
+        "stage-3-request-stage3-coverage-confirmation.json": "request_stage3_coverage_confirmation",
+        "stage-4-request-stage4-confirmation.json": "request_stage4_confirmation",
+        "stage-5-request-pending-confirmation.json": "request_pending_confirmation",
+        "stage-6-completed.json": "stage_6_completed",
+    }
+
+    for snapshot_name, action_id in expected_actions.items():
+        payload = _read(f"gate-and-render-output/{snapshot_name}")
+        assert f'"action_id": "{action_id}"' in payload

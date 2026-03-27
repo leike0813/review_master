@@ -1,0 +1,4 @@
+- [x] 减少 atomic workboard 与 atomic list 两个视图之间的冗余，让 atomic workboard 能随后续推进而更新（加入更多后续状态）
+- [x] 工件编号顺序错误， atomic workboard 之后应该是 supplement suggestion plan
+- [x] 现有框架似乎是无法实现论文结构调整的，需要再考虑一下
+- [x] “稿件草案”应该是要分类的，例如“修改方针”、“改写/润色”、“文本补充/修改/删除”、“图片修改”、“数据补充”等等，需要重新设计

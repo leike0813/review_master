@@ -9,26 +9,30 @@ TBD - created by archiving change implement-review-master-skill-contract. Update
 
 At minimum, `SKILL.md` MUST define the role of:
 
-- manuscript structure summary
-- atomic review comment list
-- comment-to-manuscript mapping table
-- priority and dependency revision board
-- per-comment response strategy cards
-- supplement suggestion planning
-- supplement intake and landing plan
-- final assembly checklist
+- `04-atomic-review-comment-list.md` as the stable Stage 3 identity/index artifact
+- `07-atomic-comment-workboard.md` as the live Stage 4-6 workboard
+- `08-supplement-suggestion-plan.md`
+- `response-strategy-cards/{comment_id}.md`
+- `15-supplement-intake-plan.md`
+- `16-final-assembly-checklist.md`
 
-#### Scenario: strategy card is pre-draft before confirmation
+#### Scenario: Stage 3 list and Stage 4-6 workboard have different contracts
 
-- **WHEN** one atomic review comment enters Stage 5 but has not yet been confirmed
-- **THEN** the per-comment strategy card must show the pending confirmation state
-- **AND** it MUST NOT present Stage 5 drafts as already authored
+- **WHEN** the workspace renders both `04-atomic-review-comment-list.md` and `07-atomic-comment-workboard.md`
+- **THEN** the atomic list MUST keep stable identity and source-trace fields only
+- **AND** the atomic workboard MUST carry live planning and execution state
 
-#### Scenario: supplement suggestion backlog is readable before intake
+#### Scenario: strategy card shows typed manuscript execution items
 
-- **WHEN** Stage 5 is entered with evidence-gap comments
-- **THEN** `supplement-suggestion-plan.md` must be generated as a user-readable planning artifact
-- **AND** `supplement-intake-plan.md` must remain the later intake/landing artifact
+- **WHEN** one atomic review comment enters confirmed Stage 5 execution
+- **THEN** the per-comment strategy card must show manuscript execution items grouped by category
+- **AND** it must keep the response draft as a separate response-side section
+
+#### Scenario: final assembly checklist uses execution-item completion names
+
+- **WHEN** `16-final-assembly-checklist.md` is rendered
+- **THEN** it must use `manuscript_execution_items_done`
+- **AND** it must use `response_draft_done`
 
 ### Requirement: Artifact generation timing and purpose
 

@@ -1,9 +1,0 @@
-\section{Background}
-
-Several strands of prior work seek to reduce the sequential bottlenecks of recurrent sequence models. Convolutional approaches such as ByteNet and ConvS2S increase parallelism through shorter computation paths, while attention-based mechanisms and memory-style architectures improve access to context across positions.
-
-Self-attention is especially attractive because it connects positions directly and can be implemented with matrix operations that fit well on modern accelerators. For sequence transduction, this suggests that attention-heavy models may achieve a better trade-off between quality and training efficiency than more sequential alternatives.
-
-\added{Our novelty claim is therefore narrower than “attention is useful.” ByteNet and ConvS2S already show that efficient non-recurrent sequence models are possible, and memory-network style models already use attention as a central primitive. The specific claim here is that a strong encoder-decoder translation system can be built from self-attention and feed-forward blocks alone, without sequence-aligned recurrence or convolution in the main transduction backbone.}
-
-We therefore take the encoder-decoder structure as given and focus on replacing its recurrent or convolutional backbone with attention blocks. The goal is not to review the full literature exhaustively, but to show that this design direction is practically competitive on large translation benchmarks and to clarify where it differs from prior efficient sequence models.

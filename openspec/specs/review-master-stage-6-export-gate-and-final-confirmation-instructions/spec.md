@@ -3,26 +3,21 @@
 ## Purpose
 TBD - created by archiving change refine-review-master-stage-6-final-review-and-export. Update Purpose after archive.
 ## Requirements
-### Requirement: Stage 6 export uses a two-step gated flow
+### Requirement: Stage 6 completion uses revision closure rather than patch export gates
 
-Stage 6 MUST export a marked manuscript before final clean export, and final clean export MUST require a final user confirmation.
+Stage 6 MUST close when revision plan actions are resolved, response rows cover every original review thread, and the working manuscript has no unaudited changes; optional `latexdiff` output must not be a hard prerequisite.
 
-#### Scenario: Marked manuscript comes first
+#### Scenario: unaudited manuscript edits block Stage 6
 
-- **Given** Stage 6 has assembled thread-level response rows
-- **When** the Agent performs the first export step
-- **Then** the docs must require a marked manuscript using the `changes` package
-- **And** the docs must forbid treating that step as the final export
+- **GIVEN** the working manuscript has changed since the last recorded audit round
+- **WHEN** the runtime evaluates Stage 6 readiness
+- **THEN** it must block completion and request revision-action capture
+- **AND** it must not silently write audit records inside `gate-and-render`
 
-#### Scenario: Final clean export requires strict closure and final confirmation
+#### Scenario: latexdiff stays optional
 
-- **Given** the marked manuscript has been reviewed
-- **When** the Agent prepares the final export
-- **Then** the docs must require a final user confirmation
-- **And** the docs must require all export gates to be closed
-- **And** the docs must require final outputs in:
-- **And** Markdown Response Letter format
-- **And** LaTeX Response Letter format
-- **And** a clean manuscript format
-- **And** the docs must forbid overwriting the original input files
+- **GIVEN** Stage 6 is otherwise complete
+- **WHEN** `latexdiff` is unavailable
+- **THEN** the runtime may emit an advisory
+- **AND** it must not treat missing `latexdiff` output as a hard gate failure
 

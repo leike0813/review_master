@@ -3,22 +3,16 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tests.helpers import GATE_SCRIPT, ROOT, copy_tree, run_python_script
+from tests.helpers import GATE_SCRIPT, ROOT, copy_tree, run_python_script, seed_review_comment_coverage_from_threads
 
 
 EXAMPLE_ROOT = ROOT / "playbooks" / "examples" / "evidence-supplement-failure-recovery"
 REQUIRED_SNAPSHOTS = {
-    "stage-1-entry-ready.json",
-    "stage-2-structure-ready.json",
-    "stage-3-atomic-ready.json",
-    "stage-4-workboard-confirmation-needed.json",
-    "stage-5-evidence-gap-blocked.json",
-    "stage-5-after-bad-supplement-blocked.json",
-    "stage-5-after-bad-supplement-agent-resume.md",
-    "stage-5-after-bad-supplement-atomic-comment-workboard.md",
-    "stage-5-after-bad-supplement-atomic_004-strategy-card.md",
-    "stage-5-after-good-supplement-ready.json",
-    "stage-6-export-ready.json",
+    "stage-1-enter-stage-2.json",
+    "stage-2-enter-stage-3.json",
+    "stage-3-request-stage3-coverage-confirmation.json",
+    "stage-4-request-stage4-confirmation.json",
+    "stage-5-request-pending-confirmation.json",
     "stage-6-completed.json",
 }
 
@@ -40,9 +34,10 @@ def test_failure_recovery_example_structure() -> None:
         "user-supplements/round-2-good",
         "workspace",
         "workspace/response-strategy-cards",
+        "workspace/manuscript-copies",
+        "workspace/manuscript-copies/source-snapshot",
+        "workspace/manuscript-copies/working-manuscript",
         "outputs",
-        "outputs/marked-manuscript",
-        "outputs/revised-manuscript",
         "gate-and-render-output",
     ]
     for relative_dir in required_dirs:
@@ -59,7 +54,7 @@ def test_failure_recovery_example_structure() -> None:
         "user-supplements/round-2-good/stability-results.csv",
         "user-supplements/round-2-good/supplement-note.md",
         "workspace/review-master.db",
-        "workspace/15-supplement-intake-plan.md",
+        "workspace/10-supplement-intake-plan.md",
         "workspace/response-strategy-cards/atomic_004.md",
         "outputs/response-letter.tex",
     ]
@@ -69,39 +64,21 @@ def test_failure_recovery_example_structure() -> None:
 
 def test_failure_recovery_snapshot_contract() -> None:
     actual_snapshots = {path.name for path in (EXAMPLE_ROOT / "gate-and-render-output").iterdir() if path.is_file()}
-    bad_payload = _read_json("gate-and-render-output/stage-5-after-bad-supplement-blocked.json")
-    good_payload = _read_json("gate-and-render-output/stage-5-after-good-supplement-ready.json")
-    export_ready_payload = _read_json("gate-and-render-output/stage-6-export-ready.json")
     completed_payload = _read_json("gate-and-render-output/stage-6-completed.json")
+    stage5_payload = _read_json("gate-and-render-output/stage-5-request-pending-confirmation.json")
 
     assert actual_snapshots == REQUIRED_SNAPSHOTS
 
-    assert bad_payload["status"] == "ok"
-    assert bad_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "resolve_blockers"
-    assert bad_payload["instruction_payload"]["resume_packet"]["active_comment_id"] == "atomic_004"
-    assert bad_payload["instruction_payload"]["resume_packet"]["resume_status"] == "blocked"
-
-    assert good_payload["status"] == "ok"
-    assert good_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "advance_active_comment"
-    assert good_payload["instruction_payload"]["resume_packet"]["resume_status"] == "ready_to_resume"
-    assert good_payload["instruction_payload"]["resume_packet"]["active_comment_id"] == "atomic_004"
-
-    assert export_ready_payload["status"] == "ok"
-    assert export_ready_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "final_review_and_clean_export"
-
     assert completed_payload["status"] == "ok"
     assert completed_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
+    assert stage5_payload["instruction_payload"]["recommended_next_action"]["action_id"] == "request_pending_confirmation"
 
 
 def test_failure_recovery_assets_explain_mismatch_and_final_workspace_replays(tmp_path: Path) -> None:
-    bad_resume = _read("gate-and-render-output/stage-5-after-bad-supplement-agent-resume.md")
-    bad_strategy_card = _read("gate-and-render-output/stage-5-after-bad-supplement-atomic_004-strategy-card.md")
     final_resume = _read("workspace/01-agent-resume.md")
     final_strategy_card = _read("workspace/response-strategy-cards/atomic_004.md")
     response_latex = _read("outputs/response-letter.tex")
 
-    assert "do not match the reviewer concern" in bad_resume
-    assert "do not answer the reviewer request for multi-seed stability evidence" in bad_strategy_card
     assert "Rejected the round-1 supplement" in final_resume
     assert "Available but insufficient" in final_strategy_card
     assert "\\documentclass" in response_latex
@@ -109,6 +86,7 @@ def test_failure_recovery_assets_explain_mismatch_and_final_workspace_replays(tm
     assert "\\end{document}" in response_latex
 
     copied_workspace = copy_tree(EXAMPLE_ROOT / "workspace", tmp_path / "workspace")
+    seed_review_comment_coverage_from_threads(copied_workspace / "review-master.db")
     payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
     assert payload["status"] == "ok"
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"

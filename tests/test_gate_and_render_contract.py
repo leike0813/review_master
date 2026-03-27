@@ -19,15 +19,17 @@ def test_runtime_digest_and_skill_contract_terms_align() -> None:
     digest_text = (ROOT / "review-master" / "assets" / "runtime" / "skill-runtime-digest.md").read_text(encoding="utf-8")
 
     for marker in [
-        "marked_manuscript",
-        "clean_manuscript",
+        "working_manuscript",
+        "latexdiff_manuscript",
         "response_markdown",
         "response_latex",
         "gate-and-render",
-        "export_patch_sets",
-        "export_patches",
-        "14-supplement-suggestion-plan.md",
-        "15-supplement-intake-plan.md",
+        "revision_action_logs",
+        "workspace_manuscript_copies",
+        "09-supplement-suggestion-plan.md",
+        "10-supplement-intake-plan.md",
+        "11-manuscript-revision-guide.md",
+        "13-revision-action-log.md",
     ]:
         assert marker in skill_text
         assert marker in digest_text
@@ -42,7 +44,8 @@ def test_gate_and_render_happy_path_contract(tmp_path: Path) -> None:
     payload = run_python_script(GATE_SCRIPT, "--artifact-root", str(copied_workspace))
 
     assert payload["status"] == "ok"
-    assert payload["artifact_presence"]["export_patch_plan_view"]["status"] == "present"
+    assert payload["artifact_presence"]["revision_guide_view"]["status"] == "present"
+    assert payload["artifact_presence"]["revision_action_log_view"]["status"] == "present"
     assert payload["instruction_payload"]["resume_packet"]["resume_status"] in {
         "bootstrap",
         "active",
@@ -54,7 +57,7 @@ def test_gate_and_render_happy_path_contract(tmp_path: Path) -> None:
     assert payload["instruction_payload"]["resume_packet"]["language_context"]["working_language"] == "zh-CN"
     assert "先" in payload["instruction_payload"]["recommended_next_action"]["instruction"] or "保持" in payload["instruction_payload"]["recommended_next_action"]["instruction"]
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
-    assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_export_clean_manuscript"
+    assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_finalize_outputs"
 
 
 def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> None:
@@ -133,7 +136,7 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
                 current_objective = 'Confirm Stage 3 extraction coverage.',
                 current_focus = 'Review comment coverage view',
                 why_paused = 'Waiting for Stage 3 coverage confirmation.',
-                next_operator_action = 'Show 06-review-comment-coverage.md to the user.'
+                next_operator_action = 'Show 07-review-comment-coverage.md to the user.'
             WHERE id = 1
             """
         )
@@ -234,7 +237,7 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     assert coverage_metrics["gate_status"] == "pass"
     assert coverage_metrics["global"]["coverage_percent_including_duplicates"] >= 50.0
     assert all(action["action_id"] != "enter_stage_4" for action in payload["instruction_payload"]["allowed_next_actions"])
-    coverage_view = (artifact_root / "06-review-comment-coverage.md").read_text(encoding="utf-8")
+    coverage_view = (artifact_root / "07-review-comment-coverage.md").read_text(encoding="utf-8")
     assert "[[covered" not in coverage_view
     assert "color: #d32f2f" in coverage_view
     assert "color: #f57c00" in coverage_view
@@ -249,7 +252,7 @@ def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> 
     assert "`atomic_002, atomic_003`" in coverage_view
     assert "This final sentence is still uncovered." in coverage_view
     assert "Editor Letter Source" in coverage_view
-    raw_threads_view = (artifact_root / "03-raw-review-thread-list.md").read_text(encoding="utf-8")
+    raw_threads_view = (artifact_root / "04-raw-review-thread-list.md").read_text(encoding="utf-8")
     assert "expected scope, and concrete evaluation requests remain in this paragraph" in raw_threads_view
 
     with sqlite3.connect(db_path) as connection:
@@ -332,7 +335,7 @@ def _prepare_stage3_threshold_workspace(tmp_path: Path, *, covered_chars: int, t
                 current_objective = 'Validate Stage 3 character coverage gate.',
                 current_focus = 'Stage 3 character coverage',
                 why_paused = 'Threshold gate check.',
-                next_operator_action = 'Inspect 06-review-comment-coverage.md.'
+                next_operator_action = 'Inspect 07-review-comment-coverage.md.'
             WHERE id = 1
             """
         )
@@ -409,7 +412,7 @@ def test_stage3_character_coverage_soft_threshold_adds_advisory(tmp_path: Path) 
     assert not any(issue["issue"] == "coverage_below_hard_threshold" for issue in payload["dependency_errors"])
     advisories = payload["instruction_payload"]["coverage_review_advisories"]
     assert any("40.00%" in item for item in advisories)
-    coverage_view = (artifact_root / "06-review-comment-coverage.md").read_text(encoding="utf-8")
+    coverage_view = (artifact_root / "07-review-comment-coverage.md").read_text(encoding="utf-8")
     assert "当前阈值判定：" in coverage_view
     assert "软提示（介于 hard 与 soft 之间）" in coverage_view
 
@@ -442,7 +445,7 @@ def test_stage3_missing_thread_source_spans_is_blocked(tmp_path: Path) -> None:
                 current_objective = 'Validate Stage 3 coverage truth.',
                 current_focus = 'Stage 3',
                 why_paused = 'Coverage review should pass before Stage 4.',
-                next_operator_action = 'Inspect 06-review-comment-coverage.md.'
+                next_operator_action = 'Inspect 07-review-comment-coverage.md.'
             WHERE id = 1
             """
         )

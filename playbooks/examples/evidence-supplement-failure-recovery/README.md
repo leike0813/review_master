@@ -1,15 +1,13 @@
 # Evidence Supplement Failure Recovery
 
-This example is derived from `playbooks/examples/evidence-supplement-multi-review/`.
+这个 example 展示当前合同下的 Stage 5 failure/recovery：
 
-It demonstrates a Stage 5 failure-and-recovery arc:
+- 第一轮补材看似相关，但没有真正覆盖 reviewer concern
+- workflow 继续 blocked
+- 第二轮补材才真正关闭 evidence gap
+- 后续进入基于 revision audit 的 Stage 6
 
-- the first supplement round provides files that look relevant but do not actually answer the reviewer concern
-- the workflow remains blocked because the evidence gap is still semantic, not structural
-- a second supplement round introduces the correct repeated-run stability evidence
-- the case then recovers and reaches `stage_6_completed`
-
-This directory contains complete runtime replay assets:
+目录说明：
 
 - `inputs/`
 - `user-supplements/round-1-bad/`
@@ -17,3 +15,6 @@ This directory contains complete runtime replay assets:
 - `workspace/`
 - `outputs/`
 - `gate-and-render-output/`
+  - 保留 Stage 1-6 的代表性 gate 快照
+
+当前 workspace 使用 `01-17` 工件序列，Stage 6 使用 `working_manuscript + revision audit + response coverage`。

@@ -20,16 +20,19 @@ def test_init_creates_bootstrap_workspace(tmp_path: Path) -> None:
     assert payload["status"] == "ok"
     assert (artifact_root / "review-master.db").exists()
     assert (artifact_root / "01-agent-resume.md").exists()
-    assert (artifact_root / "11-export-patch-plan.md").exists()
-    assert (artifact_root / "12-response-letter-table-preview.md").exists()
-    assert (artifact_root / "06-review-comment-coverage.md").exists()
-    assert (artifact_root / "14-supplement-suggestion-plan.md").exists()
-    assert (artifact_root / "15-supplement-intake-plan.md").exists()
+    assert (artifact_root / "03-style-profile.md").exists()
+    assert (artifact_root / "07-review-comment-coverage.md").exists()
+    assert (artifact_root / "09-supplement-suggestion-plan.md").exists()
+    assert (artifact_root / "10-supplement-intake-plan.md").exists()
+    assert (artifact_root / "11-manuscript-revision-guide.md").exists()
+    assert (artifact_root / "15-response-letter-preview.md").exists()
+    assert (artifact_root / "manuscript-copies" / "source-snapshot").exists()
+    assert (artifact_root / "manuscript-copies" / "working-manuscript").exists()
     assert (artifact_root / "runtime-localization").exists()
     assert (artifact_root / "runtime-localization" / "working-messages.json").exists()
     assert (artifact_root / "runtime-localization" / "document-messages.json").exists()
     agent_resume = (artifact_root / "01-agent-resume.md").read_text(encoding="utf-8")
-    response_preview = (artifact_root / "12-response-letter-table-preview.md").read_text(encoding="utf-8")
+    response_preview = (artifact_root / "15-response-letter-preview.md").read_text(encoding="utf-8")
     assert "语言上下文" in agent_resume
     assert "`文本语言` | en" in agent_resume
     assert "`工作语言` | zh-CN" in agent_resume

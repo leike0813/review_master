@@ -7,6 +7,7 @@ from tests.helpers import (
     GATE_SCRIPT,
     ROOT,
     copy_tree,
+    ensure_stage5_execution_item_schema,
     ensure_supplement_suggestion_tables,
     run_python_script,
     seed_review_comment_coverage_from_threads,
@@ -20,12 +21,14 @@ def _prepare_stage5_confirmation_case(db_path: Path, *, confirmed: bool, keep_dr
     with sqlite3.connect(db_path) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         ensure_supplement_suggestion_tables(connection)
+        ensure_stage5_execution_item_schema(connection)
         connection.execute("DELETE FROM workflow_global_blockers")
         connection.execute("DELETE FROM workflow_pending_user_confirmations")
         connection.execute("DELETE FROM strategy_card_pending_confirmations WHERE comment_id = 'atomic_004'")
         connection.execute("DELETE FROM comment_blockers WHERE comment_id = 'atomic_004'")
         connection.execute("DELETE FROM supplement_suggestion_intake_links")
         connection.execute("DELETE FROM supplement_suggestion_items")
+        connection.execute("DELETE FROM strategy_action_manuscript_execution_items WHERE comment_id = 'atomic_004'")
         connection.execute("UPDATE atomic_comment_state SET evidence_gap = 'yes' WHERE comment_id = 'atomic_004'")
         connection.execute(
             """
@@ -41,7 +44,7 @@ def _prepare_stage5_confirmation_case(db_path: Path, *, confirmed: bool, keep_dr
         connection.execute(
             """
             UPDATE comment_completion_status
-            SET manuscript_draft_done = ?,
+            SET manuscript_execution_items_done = ?,
                 response_draft_done = ?,
                 evidence_gap_closed = 'no',
                 user_strategy_confirmed = ?,
@@ -56,8 +59,24 @@ def _prepare_stage5_confirmation_case(db_path: Path, *, confirmed: bool, keep_dr
             ),
         )
         if not keep_drafts:
-            connection.execute("DELETE FROM strategy_action_manuscript_drafts WHERE comment_id = 'atomic_004'")
             connection.execute("DELETE FROM comment_response_drafts WHERE comment_id = 'atomic_004'")
+        else:
+            connection.execute(
+                """
+                INSERT INTO strategy_action_manuscript_execution_items (
+                    comment_id, action_order, item_order, category, content_text, rationale, target_scope_note
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "atomic_004",
+                    1,
+                    1,
+                    "text_add_modify_delete",
+                    "Add a stability-analysis paragraph and a short caption note.",
+                    "This preserves the confirmed strategy in manuscript-facing form.",
+                    "Results::stability::paragraph-plus-caption",
+                ),
+            )
         if not confirmed:
             connection.execute(
                 """
@@ -100,9 +119,10 @@ def test_stage5_unconfirmed_strategy_requests_pending_confirmation(tmp_path: Pat
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "request_pending_confirmation"
     assert all(action["action_id"] != "author_comment_drafts" for action in payload["instruction_payload"]["allowed_next_actions"])
     strategy_card = (copied_workspace / "response-strategy-cards" / "atomic_004.md").read_text(encoding="utf-8")
-    suggestion_view = (copied_workspace / "14-supplement-suggestion-plan.md").read_text(encoding="utf-8")
+    suggestion_view = (copied_workspace / "09-supplement-suggestion-plan.md").read_text(encoding="utf-8")
     assert "用户可以继续修改这张策略卡" in strategy_card
-    assert "在用户显式确认或修正这张策略卡之前，不得生成草案" in strategy_card
+    assert "用户可以继续修改这张策略卡" in strategy_card
+    assert "在用户确认该策略前，不得生成回复草案" in strategy_card or "在确认之前" in strategy_card
     assert "当前 active comment" in suggestion_view
     assert "atomic_004" in suggestion_view
 
@@ -138,4 +158,4 @@ def test_stage5_unconfirmed_strategy_with_stale_drafts_is_invalid(tmp_path: Path
     details = [item["detail"] for item in payload["consistency_errors"]]
 
     assert payload["status"] == "issues_found"
-    assert any("unconfirmed strategy must not retain Stage 5 drafts" in detail for detail in details)
+    assert any("unconfirmed strategy must not retain Stage 5 execution items or response drafts" in detail for detail in details)

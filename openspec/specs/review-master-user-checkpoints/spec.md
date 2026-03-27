@@ -33,10 +33,14 @@ If an atomic comment requires additional experiments, data, references, figures,
 - **THEN** the workflow must produce a gap analysis and a user-facing materials request for that comment
 
 ### Requirement: Final review is mandatory before export
-After all comments are individually closed, the workflow MUST still require a final user review before exporting the final revised manuscript and response letter.
 
-#### Scenario: Final package waits for user review
-- **WHEN** all per-comment items have reached a completed state
-- **THEN** the workflow must present the final package for review
-- **AND** only export after the user confirms the final review
+The final checkpoint MUST review revision-action closure and thread-level response coverage rather than patch export completeness.
+
+#### Scenario: Stage 6 completion checks response coverage and audited edits
+
+- **GIVEN** Stage 6 is nearing completion
+- **WHEN** the runtime asks for final review
+- **THEN** it must surface whether all revision plan actions are closed
+- **AND** whether every original review thread is covered
+- **AND** whether the working manuscript contains any unaudited modifications
 

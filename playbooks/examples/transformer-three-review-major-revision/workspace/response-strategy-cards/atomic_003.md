@@ -1,6 +1,6 @@
 # Response Strategy Card: atomic_003
 
-这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations`、`comment_completion_status`、`strategy_action_manuscript_drafts`、`comment_response_drafts` 与 `comment_blockers`。一张卡只服务一个 `comment_id`。
+这张卡是从数据库渲染出的单 canonical atomic item 只读策略视图。数据库真源包括 `atomic_comments`、`raw_thread_atomic_links`、`atomic_comment_state`、`atomic_comment_target_locations`、`strategy_cards`、`strategy_card_actions`、`strategy_action_target_locations`、`strategy_card_evidence_items`、`strategy_card_pending_confirmations`、`comment_completion_status`、`strategy_action_manuscript_execution_items`、`comment_response_drafts` 与 `comment_blockers`。一张卡只服务一个 `comment_id`。
 
 ## 头部信息
 
@@ -26,7 +26,7 @@
 
 ## 策略确认状态
 
-- 该策略已被用户显式确认，现在可以在这张卡里继续形成或审阅 Stage 5 drafts。
+- 该策略已被用户显式确认，现在可以在这张卡里继续形成或审阅 Stage 5 稿件执行项与回复草案。
 
 ## 计划中的稿件动作
 
@@ -34,12 +34,33 @@
 | --- | --- | --- | --- |
 | A1 | Add a concise architecture-sensitivity paragraph summarizing head-count, dropout, and scale variations. | sections/architecture.tex::Model Configuration::paragraph 1, sections/results.tex::Model Variations::paragraph 1 | Provide a direct point-to-point response for atomic_003. |
 
-## 稿件草案
+## 稿件执行项
 
-| 动作 ID | 位置 | 目标位置 | 草案文本 | 理由 |
+### `modification_strategy`
+
+| 动作 ID | `item_order` | `target_scope_note` | `content_text` | 理由 |
 | --- | --- | --- | --- | --- |
-| A1 | L1 | sections/architecture.tex::Model Configuration::paragraph 1 | Single-head attention underperformed the default multi-head setting, removing dropout reduced generalization quality, and scaling the model improved BLEU without eliminating the contribution of the attention design. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
-| A1 | L2 | sections/results.tex::Model Variations::paragraph 1 | Single-head attention underperformed the default multi-head setting, removing dropout reduced generalization quality, and scaling the model improved BLEU without eliminating the contribution of the attention design. | Recovered from the selected Stage 6 manuscript variant to preserve replay continuity after Stage 5 draft-model migration. |
+|  |  |  |  |  |
+### `rewrite_polish`
+
+| 动作 ID | `item_order` | `target_scope_note` | `content_text` | 理由 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+### `text_add_modify_delete`
+
+| 动作 ID | `item_order` | `target_scope_note` | `content_text` | 理由 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+### `figure_update`
+
+| 动作 ID | `item_order` | `target_scope_note` | `content_text` | 理由 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+### `data_supplement`
+
+| 动作 ID | `item_order` | `target_scope_note` | `content_text` | 理由 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
 
 ## Response 草案
 
@@ -66,7 +87,7 @@ We added the requested sensitivity analysis and used it to separate architecture
 
 ## 完成定义
 
-- [x] 稿件修改草案已形成
+- [x] 稿件执行项已形成
 - [x] 对应 response 草案已形成
 - [x] 证据缺口已关闭
 - [x] 用户已确认该条策略

@@ -26,7 +26,7 @@ def test_sample_workspaces_gate_and_render_regression(tmp_path: Path) -> None:
         assert payload["instruction_payload"]["resume_packet"]["language_context"]["document_language"] == "en"
         assert payload["instruction_payload"]["resume_packet"]["language_context"]["working_language"] == "zh-CN"
         assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
-        assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_export_clean_manuscript"
+        assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_finalize_outputs"
 
 
 def test_sample_response_latex_outputs_have_front_matter() -> None:
@@ -45,17 +45,21 @@ def test_sample_response_latex_outputs_have_front_matter() -> None:
         assert "\\subsection*{ reviewer\\_" in text
 
 
-def test_sample_workspace_checklists_use_stage5_draft_columns() -> None:
+def test_sample_workspace_checklists_use_stage5_draft_columns(tmp_path: Path) -> None:
     for name in [
         "happy-path-minimal",
         "evidence-supplement-multi-review",
         "evidence-supplement-failure-recovery",
         "transformer-three-review-major-revision",
     ]:
-        text = (
-            ROOT / "playbooks" / "examples" / name / "workspace" / "16-final-assembly-checklist.md"
-        ).read_text(encoding="utf-8")
-        assert "manuscript_draft_done" in text
+        workspace = copy_tree(
+            ROOT / "playbooks" / "examples" / name / "workspace",
+            tmp_path / name,
+        )
+        seed_review_comment_coverage_from_threads(workspace / "review-master.db")
+        run_python_script(GATE_SCRIPT, "--artifact-root", str(workspace))
+        text = (workspace / "17-final-assembly-checklist.md").read_text(encoding="utf-8")
+        assert "manuscript_execution_items_done" in text
         assert "response_draft_done" in text
         assert "manuscript_change_done" not in text
         assert "response_section_done" not in text

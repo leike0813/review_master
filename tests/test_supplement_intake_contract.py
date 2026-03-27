@@ -102,7 +102,7 @@ def test_stage5_ready_is_blocked_when_accepted_supplement_has_no_landing(tmp_pat
 
 
 def test_failure_recovery_workspace_renders_supplement_intake_plan_view() -> None:
-    text = (EXAMPLE_ROOT / "workspace" / "15-supplement-intake-plan.md").read_text(encoding="utf-8")
+    text = (EXAMPLE_ROOT / "workspace" / "10-supplement-intake-plan.md").read_text(encoding="utf-8")
 
     assert "round-1-bad" in text
     assert "round-2-good" in text
