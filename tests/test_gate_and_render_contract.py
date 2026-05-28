@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 
@@ -12,6 +13,8 @@ from tests.helpers import (
     seed_review_comment_coverage_from_threads,
     write_review_comment_coverage_truth,
 )
+
+CAPTURE_SCRIPT = ROOT / "review-master" / "scripts" / "capture_revision_action.py"
 
 
 def test_runtime_digest_and_skill_contract_terms_align() -> None:
@@ -58,6 +61,109 @@ def test_gate_and_render_happy_path_contract(tmp_path: Path) -> None:
     assert "先" in payload["instruction_payload"]["recommended_next_action"]["instruction"] or "保持" in payload["instruction_payload"]["recommended_next_action"]["instruction"]
     assert payload["instruction_payload"]["recommended_next_action"]["action_id"] == "stage_6_completed"
     assert payload["instruction_payload"]["recommended_next_action"]["recipe_id"] == "recipe_stage6_finalize_outputs"
+
+
+def test_capture_revision_action_accepts_agent_owned_semantic_entries(tmp_path: Path) -> None:
+    artifact_root = tmp_path / "workspace"
+    run_python_script(
+        INIT_SCRIPT,
+        "--artifact-root",
+        str(artifact_root),
+        "--document-language",
+        "en",
+        "--working-language",
+        "zh-CN",
+    )
+    db_path = artifact_root / "review-master.db"
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(
+            """
+            INSERT INTO raw_review_threads (thread_id, reviewer_id, thread_order, source_type, original_text, normalized_summary)
+            VALUES ('thread_001', 'reviewer_1', 1, 'reviewer_comment', 'Clarify preprocessing.', 'Clarify preprocessing')
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO atomic_comments (comment_id, comment_order, canonical_summary, required_action)
+            VALUES ('atomic_001', 1, 'Clarify preprocessing', 'Revise methods.')
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO revision_plan_actions (
+                plan_action_id, plan_order, comment_id, action_order, execution_category,
+                title, objective, suggested_change, evidence_requirement, status
+            ) VALUES ('plan_001', 1, 'atomic_001', 1, 'text_add_modify_delete',
+                'Clarify preprocessing', 'Explain preprocessing', 'Revise methods paragraph', '', 'in_progress')
+            """
+        )
+        connection.commit()
+
+    revision_payload = {
+        "summary": "Clarified preprocessing method details.",
+        "change_note": "Expanded the Methods paragraph with parameter details.",
+        "response_note": "Use this as the basis for the response to reviewer 1.",
+        "status": "completed",
+        "operator_role": "agent",
+        "plan_action_ids": ["plan_001"],
+        "thread_ids": ["thread_001"],
+        "plan_action_status_updates": [{"plan_action_id": "plan_001", "status": "completed"}],
+        "entries": [
+            {
+                "target_file": "main.tex",
+                "target_locator": "Methods / preprocessing paragraph",
+                "change_type": "revised",
+                "change_summary": "Clarified preprocessing pipeline and parameter choices.",
+                "rationale": "Addresses reproducibility concern.",
+                "evidence_source": "Stage 5 execution item for atomic_001.",
+                "expected_response_use": "Mention in thread_001 response row.",
+            }
+        ],
+    }
+    payload = run_python_script(CAPTURE_SCRIPT, "--artifact-root", str(artifact_root), "--payload", json.dumps(revision_payload))
+
+    assert payload["status"] == "ok"
+    assert payload["captured_entries"] == 1
+    with sqlite3.connect(db_path) as connection:
+        entry = connection.execute(
+            """
+            SELECT target_file, target_locator, change_type, change_summary
+            FROM revision_action_log_entries
+            """
+        ).fetchone()
+        assert entry == (
+            "main.tex",
+            "Methods / preprocessing paragraph",
+            "revised",
+            "Clarified preprocessing pipeline and parameter choices.",
+        )
+        plan_status = connection.execute("SELECT status FROM revision_plan_actions WHERE plan_action_id = 'plan_001'").fetchone()[0]
+        assert plan_status == "completed"
+
+
+def test_capture_revision_action_rejects_completed_log_without_entries(tmp_path: Path) -> None:
+    artifact_root = tmp_path / "workspace"
+    run_python_script(
+        INIT_SCRIPT,
+        "--artifact-root",
+        str(artifact_root),
+        "--document-language",
+        "en",
+        "--working-language",
+        "zh-CN",
+    )
+    payload = run_python_script(
+        CAPTURE_SCRIPT,
+        "--artifact-root",
+        str(artifact_root),
+        "--payload",
+        json.dumps({"summary": "Empty completed log", "status": "completed", "entries": []}),
+        expect_success=False,
+    )
+
+    assert payload["status"] == "error"
+    assert "at least one semantic entry" in payload["error"]
 
 
 def test_stage3_requests_coverage_confirmation_before_stage4(tmp_path: Path) -> None:

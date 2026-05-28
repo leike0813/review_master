@@ -257,6 +257,22 @@ def ensure_stage6_revision_loop_schema(connection: sqlite3.Connection) -> None:
     )
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS revision_action_log_entries (
+            log_id TEXT NOT NULL,
+            entry_order INTEGER NOT NULL,
+            target_file TEXT NOT NULL DEFAULT '',
+            target_locator TEXT NOT NULL DEFAULT '',
+            change_type TEXT NOT NULL CHECK (change_type IN ('added', 'revised', 'deleted', 'moved', 'reframed', 'format_only', 'response_only')),
+            change_summary TEXT NOT NULL DEFAULT '',
+            rationale TEXT NOT NULL DEFAULT '',
+            evidence_source TEXT NOT NULL DEFAULT '',
+            expected_response_use TEXT NOT NULL DEFAULT '',
+            PRIMARY KEY (log_id, entry_order)
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS revision_action_log_file_diffs (
             log_id TEXT NOT NULL,
             file_order INTEGER NOT NULL,
@@ -439,6 +455,23 @@ def seed_stage6_revision_loop_from_legacy_state(db_path: Path) -> None:
                     """,
                     (thread_id, log_id),
                 )
+                connection.execute(
+                    """
+                    INSERT INTO revision_action_log_entries (
+                        log_id, entry_order, target_file, target_locator, change_type,
+                        change_summary, rationale, evidence_source, expected_response_use
+                    ) VALUES (?, 1, ?, ?, 'revised', ?, ?, ?, ?)
+                    """,
+                    (
+                        log_id,
+                        "manuscript-copies/working-manuscript",
+                        thread_id,
+                        f"Backfilled semantic revision entry for {thread_id}.",
+                        "Legacy fixture backfill for Stage 6 contract compatibility.",
+                        "Legacy Stage 5/6 fixture truth.",
+                        "Supports the migrated response row for this reviewer thread.",
+                    ),
+                )
                 linked_plan_action_ids: list[str] = []
                 for comment_id in comment_links.get(thread_id, []):
                     linked_plan_action_ids.extend(plan_links.get(comment_id, []))
@@ -451,6 +484,38 @@ def seed_stage6_revision_loop_from_legacy_state(db_path: Path) -> None:
                         (log_id, plan_action_id),
                     )
                 log_order += 1
+        logs_without_entries = list(
+            connection.execute(
+                """
+                SELECT ral.log_id, ral.summary
+                FROM revision_action_logs ral
+                LEFT JOIN revision_action_log_entries rale ON rale.log_id = ral.log_id
+                WHERE ral.status != 'cancelled'
+                GROUP BY ral.log_id
+                HAVING COUNT(rale.entry_order) = 0
+                ORDER BY ral.log_order, ral.log_id
+                """
+            ).fetchall()
+        )
+        for row in logs_without_entries:
+            log_id = str(row["log_id"])
+            connection.execute(
+                """
+                INSERT INTO revision_action_log_entries (
+                    log_id, entry_order, target_file, target_locator, change_type,
+                    change_summary, rationale, evidence_source, expected_response_use
+                ) VALUES (?, 1, ?, ?, 'revised', ?, ?, ?, ?)
+                """,
+                (
+                    log_id,
+                    "manuscript-copies/working-manuscript",
+                    log_id,
+                    str(row["summary"] or f"Backfilled semantic revision entry for {log_id}."),
+                    "Legacy fixture backfill for semantic Stage 6 log contract compatibility.",
+                    "Legacy Stage 6 revision log.",
+                    "Supports the linked response row for this fixture.",
+                ),
+            )
         connection.execute(
             """
             UPDATE export_artifacts

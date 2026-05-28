@@ -4,18 +4,16 @@
 TBD - created by archiving change bootstrap-review-master-helper-script-contracts. Update Purpose after archive.
 ## Requirements
 ### Requirement: Helper scripts use a uniform runtime contract
-The first helper scripts SHALL use Python and a uniform CLI contract:
 
-- they are run with a Python 3 interpreter available in the host environment
-- they accept inputs through command-line arguments rather than stdin
-- they emit exactly one JSON object to stdout
-- they return exit code `0` when execution completes and a report is available
-- they return a non-zero exit code only when the program itself cannot produce a valid report
+Stage 6 revision capture helpers MUST keep the standard JSON stdout contract while accepting Agent-authored semantic log payloads.
 
-#### Scenario: Validation issues do not become process failure
-- **WHEN** the validator finds missing artifacts or rule violations
-- **THEN** it still returns one JSON report to stdout
-- **AND** exits with code `0`
+#### Scenario: commit revision round writes Agent-authored semantic logs
+
+- **WHEN** `commit_revision_round.py` is called with `--artifact-root` and `--payload`
+- **THEN** it MUST pass the payload to `capture_revision_action.py`
+- **AND** `capture_revision_action.py` MUST write `revision_action_logs`, revision log links, `revision_action_log_entries`, and any requested plan action status updates
+- **AND** neither script MUST scan `working_manuscript`, compare `source_snapshot`, or generate file diffs
+- **AND** `commit_revision_round.py` MUST run `gate-and-render` after the semantic log write succeeds
 
 ### Requirement: detect_main_tex.py exposes entry-detection fields
 `review-master/scripts/detect_main_tex.py` MUST accept `--manuscript-source PATH` and return at least these top-level fields:
